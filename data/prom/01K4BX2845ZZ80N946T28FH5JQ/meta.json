@@ -1,0 +1,17 @@
+{
+	"ulid": "01K4BX2845ZZ80N946T28FH5JQ",
+	"minTime": 1757030400000,
+	"maxTime": 1757037600000,
+	"stats": {
+		"numSamples": 211742,
+		"numSeries": 925,
+		"numChunks": 1759
+	},
+	"compaction": {
+		"level": 1,
+		"sources": [
+			"01K4BX2845ZZ80N946T28FH5JQ"
+		]
+	},
+	"version": 1
+}

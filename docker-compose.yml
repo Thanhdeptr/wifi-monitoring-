@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   snmp-exporter:
-    image: prom/snmp-exporter:latest
+    image: prom/snmp-exporter:v0.24.1
     container_name: snmp-exporter
     ports: ["9116:9116"]
     volumes:
