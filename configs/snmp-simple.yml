@@ -11,5 +11,7 @@ modules:
       - 1.3.6.1.2.1.2.2.1.8   # ifOperStatus
       - 1.3.6.1.2.1.2.2.1.10  # ifInOctets
       - 1.3.6.1.2.1.2.2.1.16  # ifOutOctets
+    get:
+      - 1.3.6.1.2.1.1.3.0     # sysUpTime
     timeout: 10s
     retries: 1

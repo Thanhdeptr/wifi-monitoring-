@@ -5,7 +5,7 @@ services:
     container_name: snmp-exporter
     ports: ["9116:9116"]
     volumes:
-      - ./configs/snmp-simple.yml:/etc/snmp_exporter/snmp.yml:ro
+      - ./configs/snmp.yml:/etc/snmp_exporter/snmp.yml:ro
     restart: unless-stopped
 
   prometheus:
