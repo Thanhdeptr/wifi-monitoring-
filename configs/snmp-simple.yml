@@ -1,3 +1,4 @@
+# SNMP exporter config for v0.20.0
 auths:
   public_v2c:
     version: 2
