@@ -1,4 +1,4 @@
-# SNMP exporter config for v0.18.0 - OLDEST FORMAT
+# SNMP exporter config for v0.18.0 - CORRECT FORMAT
 public_v2c:
   version: 2
   community: public

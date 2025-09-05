@@ -1,11 +1,11 @@
 version: '3.8'
 services:
   snmp-exporter:
-    image: prom/snmp-exporter:v0.18.0
+    image: prom/snmp-exporter:latest
     container_name: snmp-exporter
     ports: ["9116:9116"]
     volumes:
-      - ./configs/snmp-simple.yml:/etc/snmp_exporter/snmp.yml:ro
+      - ./configs/snmp.yml:/etc/snmp_exporter/snmp.yml:ro
     restart: unless-stopped
 
   prometheus:
