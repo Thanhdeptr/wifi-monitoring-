@@ -25,29 +25,6 @@ modules:
     timeout: 10s
     retries: 3
     max_repetitions: 25
-    overrides:
-      ifDescr:
-        type: DisplayString
-      ifSpeed:
-        type: gauge
-      ifOperStatus:
-        type: gauge
-      ifInOctets:
-        type: counter
-      ifOutOctets:
-        type: counter
-      ifInUcastPkts:
-        type: counter
-      ifOutUcastPkts:
-        type: counter
-      ifInDiscards:
-        type: counter
-      ifOutDiscards:
-        type: counter
-      ifInErrors:
-        type: counter
-      ifOutErrors:
-        type: counter
 
   system_mib:
     walk:
@@ -81,42 +58,3 @@ modules:
     timeout: 10s
     retries: 3
     max_repetitions: 25
-    overrides:
-      sysDescr:
-        type: DisplayString
-      sysUpTime:
-        type: gauge
-      sysName:
-        type: DisplayString
-      sysLocation:
-        type: DisplayString
-      sysServices:
-        type: gauge
-      memTotalReal:
-        type: gauge
-      memAvailReal:
-        type: gauge
-      memTotalSwap:
-        type: gauge
-      memAvailSwap:
-        type: gauge
-      ssCpuRawUser:
-        type: counter
-      ssCpuRawNice:
-        type: counter
-      ssCpuRawSystem:
-        type: counter
-      ssCpuRawIdle:
-        type: counter
-      ssCpuRawWait:
-        type: counter
-      ssCpuRawKernel:
-        type: counter
-      ssCpuRawInterrupt:
-        type: counter
-      laLoad1:
-        type: gauge
-      laLoad2:
-        type: gauge
-      laLoad3:
-        type: gauge
