@@ -27,8 +27,9 @@ modules:
 
   # Module test đơn giản
   simple_test:
-    walk:
+    get:
       - 1.3.6.1.2.1.1.3.0     # sysUpTime
+    walk:
       - 1.3.6.1.2.1.2.2.1.8   # ifOperStatus
     timeout: 10s
     retries: 1
