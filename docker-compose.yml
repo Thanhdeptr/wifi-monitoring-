@@ -8,6 +8,16 @@ services:
       - ./configs/snmp.yml:/etc/snmp_exporter/snmp.yml:ro
     restart: unless-stopped
 
+  speedtest-exporter:
+    image: miguelndecarvalho/speedtest-exporter
+    container_name: speedtest-exporter
+    environment:
+      - SPEEDTEST_PORT=9798
+      - SPEEDTEST_SERVER=26853
+    ports:
+      - 9798:9798
+    restart: unless-stopped
+
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus

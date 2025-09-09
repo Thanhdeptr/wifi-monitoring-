@@ -1,0 +1,17 @@
+{
+	"ulid": "01K4NJ242239M84M5KT21E5ZJ5",
+	"minTime": 1757354408734,
+	"maxTime": 1757361600000,
+	"stats": {
+		"numSamples": 503130,
+		"numSeries": 2120,
+		"numChunks": 4213
+	},
+	"compaction": {
+		"level": 1,
+		"sources": [
+			"01K4NJ242239M84M5KT21E5ZJ5"
+		]
+	},
+	"version": 1
+}
