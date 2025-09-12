@@ -37,6 +37,30 @@ scrape_configs:
       - target_label: __address__
         replacement: 192.168.10.18:9116
 
+  # TP-Link Omada ER7212CPU (Controller) - Test
+  - job_name: 'omada-controller'
+    metrics_path: /snmp
+    scrape_timeout: 30s
+    scrape_interval: 30s
+    params:
+      module: [if_mib]
+      auth: [public_v2c]
+    static_configs:
+      - targets: ['192.168.10.71']
+        labels:
+          device: 'ER7212CPU'
+          vendor: 'TP-Link'
+          site: 'HQ'
+          gateway: 'Omada-Controller'
+          job_type: 'interfaces'
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: 192.168.10.18:9116
+
   # Speedtest monitoring - All WAN lines
   - job_name: 'speedtest'
     scrape_interval: 5m  # Default interval for most WANs
