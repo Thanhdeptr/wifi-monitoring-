@@ -37,61 +37,60 @@ scrape_configs:
       - target_label: __address__
         replacement: 192.168.10.18:9116
 
-  - job_name: 'speedtest1'
-    scrape_interval: 1h
+  # Speedtest monitoring - All WAN lines
+  - job_name: 'speedtest'
+    scrape_interval: 5m  # Default interval for most WANs
     scrape_timeout: 2m
     static_configs:
+      # WAN1 - 1h interval (will use 5m due to job-level setting)
       - targets: ['192.168.10.18:9798']
-
-  - job_name: 'speedtest2'
-    scrape_interval: 1h
-    scrape_timeout: 2m
-    static_configs:
+        labels:
+          gateway: 'GW1'
+          line: 'WAN1'
+      
+      # WAN2 - 1h interval (will use 5m due to job-level setting)
       - targets: ['192.168.10.18:9799']
-
-  - job_name: 'speedtest3'
-    scrape_interval: 1h
-    scrape_timeout: 2m
-    static_configs:
+        labels:
+          gateway: 'GW2'
+          gateway1: 'GW5'
+          line: 'WAN2'
+      
+      # WAN3 - 1h interval (will use 5m due to job-level setting)
       - targets: ['192.168.10.18:9800']
-
-  - job_name: 'speedtest4'
-    scrape_interval: 5m
-    scrape_timeout: 2m
-    static_configs:
+        labels:
+          gateway: 'GW2'
+          gateway1: 'GW5'
+          line: 'WAN3'
+      
+      # WAN4 - 5m interval
       - targets: ['192.168.10.18:9801']
         labels:
           gateway: 'GW4'
-
-  - job_name: 'speedtest5'
-    scrape_interval: 5m
-    scrape_timeout: 2m
-    static_configs:
+          line: 'WAN4'
+      
+      # WAN5 - 5m interval
       - targets: ['192.168.10.18:9802']
         labels:
           gateway: 'GW4'
-
-  - job_name: 'speedtest6'
-    scrape_interval: 5m
-    scrape_timeout: 2m
-    static_configs:
+          line: 'WAN5'
+      
+      # WAN6 - 5m interval
       - targets: ['192.168.10.18:9803']
         labels:
           gateway: 'GW4'
-
-  - job_name: 'speedtest7'
-    scrape_interval: 5m
-    scrape_timeout: 2m
-    static_configs:
+          gateway1: 'GW5'
+          line: 'WAN6'
+      
+      # WAN7 - 5m interval
       - targets: ['192.168.10.18:9804']
         labels:
           gateway: 'GW4'
-
-  - job_name: 'speedtest8'
-    scrape_interval: 1h
-    scrape_timeout: 2m
-    static_configs:
+          gateway1: 'GW5'
+          line: 'WAN7'
+      
+      # WAN8 - 1h interval (will use 5m due to job-level setting)
       - targets: ['192.168.10.18:9805']
         labels:
-          gateway: 'GW4'
+          gateway: 'GW5'
+          line: 'WAN8'
 
