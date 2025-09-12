@@ -1,0 +1,76 @@
+version: "3.8"
+
+services:
+  speedtest1:
+    image: ghcr.io/miguelndecarvalho/speedtest-exporter
+    container_name: speedtest1
+    network_mode: "host"
+    environment:
+      SPEEDTEST_ARGS: "-i 192.168.10.160"
+      SPEEDTEST_SERVER: 26853
+      SPEEDTEST_PORT: 9798
+      LISTEN_ADDRESS: 0.0.0.0:9798
+
+  speedtest2:
+    image: ghcr.io/miguelndecarvalho/speedtest-exporter
+    container_name: speedtest2
+    network_mode: "host"
+    environment:
+      SPEEDTEST_ARGS: "-i 192.168.10.161"
+      SPEEDTEST_SERVER: 26853
+      SPEEDTEST_PORT: 9799
+
+  speedtest3:
+    image: ghcr.io/miguelndecarvalho/speedtest-exporter
+    container_name: speedtest3
+    network_mode: "host"
+    environment:
+      SPEEDTEST_ARGS: "-i 192.168.10.162"
+      SPEEDTEST_SERVER: 26853
+      SPEEDTEST_PORT: 9800
+
+  speedtest4:
+    image: ghcr.io/miguelndecarvalho/speedtest-exporter
+    container_name: speedtest4
+    network_mode: "host"
+    environment:
+      SPEEDTEST_ARGS: "-i 192.168.10.163"
+      SPEEDTEST_SERVER: 26853
+      SPEEDTEST_PORT: 9801
+
+  speedtest5:
+    image: ghcr.io/miguelndecarvalho/speedtest-exporter
+    container_name: speedtest5
+    network_mode: "host"
+    environment:
+      SPEEDTEST_ARGS: "-i 192.168.10.164"
+      SPEEDTEST_SERVER: 26853
+      SPEEDTEST_PORT: 9802
+
+  speedtest6:
+    image: ghcr.io/miguelndecarvalho/speedtest-exporter
+    container_name: speedtest6
+    network_mode: "host"
+    environment:
+      SPEEDTEST_ARGS: "-i 192.168.10.165"
+      SPEEDTEST_SERVER: 26853
+      SPEEDTEST_PORT: 9803
+
+  speedtest7:
+    image: ghcr.io/miguelndecarvalho/speedtest-exporter
+    container_name: speedtest7
+    network_mode: "host"
+    environment:
+      SPEEDTEST_ARGS: "-i 192.168.10.166"
+      SPEEDTEST_SERVER: 26853
+      SPEEDTEST_PORT: 9804
+
+  speedtest8:
+    image: ghcr.io/miguelndecarvalho/speedtest-exporter
+    container_name: speedtest8
+    network_mode: "host"
+    environment:
+      SPEEDTEST_ARGS: "-i 192.168.10.167"
+      SPEEDTEST_SERVER: 26853
+      SPEEDTEST_PORT: 9805
+

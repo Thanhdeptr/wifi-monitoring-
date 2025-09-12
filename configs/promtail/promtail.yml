@@ -1,0 +1,72 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://192.168.10.18:3100/loki/api/v1/push
+
+scrape_configs:
+  # Collect system logs from /var/log
+  - job_name: system
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: syslog
+          host: ${HOSTNAME}
+          __path__: /var/log/*log
+
+  # Collect auth logs
+  - job_name: auth
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: auth
+          host: ${HOSTNAME}
+          __path__: /var/log/auth.log
+
+  # Collect kernel logs
+  - job_name: kern
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: kern
+          host: ${HOSTNAME}
+          __path__: /var/log/kern.log
+
+  # Collect messages
+  - job_name: messages
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: messages
+          host: ${HOSTNAME}
+          __path__: /var/log/messages
+
+  # Syslog receiver (UDP port 514)
+  - job_name: syslog
+    syslog:
+      listen_address: 0.0.0.0:1514
+      listen_protocol: udp
+      idle_timeout: 60s
+      label_structured_data: yes
+      labels:
+        job: syslog-udp
+        host: ${HOSTNAME}
+
+  # Syslog receiver (TCP port 514) 
+  - job_name: syslog-tcp
+    syslog:
+      listen_address: 0.0.0.0:1515
+      listen_protocol: tcp
+      idle_timeout: 60s
+      label_structured_data: yes
+      labels:
+        job: syslog-tcp
+        host: ${HOSTNAME}

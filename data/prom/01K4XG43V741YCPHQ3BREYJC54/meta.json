@@ -1,0 +1,17 @@
+{
+	"ulid": "01K4XG43V741YCPHQ3BREYJC54",
+	"minTime": 1757620801268,
+	"maxTime": 1757628000000,
+	"stats": {
+		"numSamples": 836000,
+		"numSeries": 3761,
+		"numChunks": 7289
+	},
+	"compaction": {
+		"level": 1,
+		"sources": [
+			"01K4XG43V741YCPHQ3BREYJC54"
+		]
+	},
+	"version": 1
+}
