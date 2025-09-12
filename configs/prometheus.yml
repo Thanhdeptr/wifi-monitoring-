@@ -41,7 +41,7 @@ scrape_configs:
   - job_name: 'omada-controller'
     metrics_path: /snmp
     scrape_timeout: 30s
-    scrape_interval: 30s
+    scrape_interval: 1h
     params:
       module: [if_mib]
       auth: [public_v2c]
@@ -118,3 +118,10 @@ scrape_configs:
           gateway: 'GW5'
           line: 'WAN8'
 
+
+  # Omada Controller Exporter
+  - job_name: 'omada-exporter'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    static_configs:
+      - targets: ['192.168.10.18:9202']
