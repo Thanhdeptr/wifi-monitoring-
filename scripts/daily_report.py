@@ -18,7 +18,8 @@ def prom_query(expr: str) -> List[Dict]:
         params={"query": expr},
         timeout=30,
     )
-    resp.raise_for_status()
+    if not resp.ok:
+        raise RuntimeError(f"Prometheus error for {expr}: {resp.status_code} {resp.text}")
     data = resp.json()
     if data.get("status") != "success":
         raise RuntimeError(f"Prometheus error for {expr}: {data}")
@@ -36,7 +37,8 @@ def prom_query_range(expr: str, start: dt.datetime, end: dt.datetime, step: str 
         },
         timeout=60,
     )
-    resp.raise_for_status()
+    if not resp.ok:
+        raise RuntimeError(f"Prometheus range error for {expr}: {resp.status_code} {resp.text}")
     data = resp.json()
     if data.get("status") != "success":
         raise RuntimeError(f"Prometheus range error for {expr}: {data}")
@@ -83,16 +85,13 @@ def collect_cpu_ram_24h_by_gw() -> List[str]:
     # RAM % theo gw: ưu tiên cách đơn giản theo hrStorageIndex=1 (nếu thiết bị mapping như bạn nêu),
     # nếu không có dữ liệu thì fallback sang lọc theo mô tả "Physical memory".
     mem_expr_idx1 = (
-        "100 * avg by (gw) ("
-        "hrStorageUsed{hrStorageIndex=\\\"1\\\"} / on (instance,hrStorageIndex) hrStorageSize{hrStorageIndex=\\\"1\\\"}"
-        ")"
+        "100 * avg by (gw) (hrStorageUsed{hrStorageIndex=\\\"1\\\"} / hrStorageSize{hrStorageIndex=\\\"1\\\"})"
     )
     mem_series = prom_query_range(mem_expr_idx1, start, end, step="5m")
     if not mem_series:
         mem_expr_descr = (
             "100 * avg by (gw) ("
-            "(hrStorageUsed and on (hrStorageIndex,instance) hrStorageDescr{hrStorageDescr=\\\"Physical memory\\\"}) / on (instance,hrStorageIndex) "
-            "(hrStorageSize and on (hrStorageIndex,instance) hrStorageDescr{hrStorageDescr=\\\"Physical memory\\\"})"
+            "hrStorageUsed{hrStorageType=\\\"1.3.6.1.2.1.25.2.1.2\\\"} / hrStorageSize{hrStorageType=\\\"1.3.6.1.2.1.25.2.1.2\\\"}"
             ")"
         )
         mem_series = prom_query_range(mem_expr_descr, start, end, step="5m")
