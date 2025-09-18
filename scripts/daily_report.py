@@ -85,14 +85,12 @@ def collect_cpu_ram_24h_by_gw() -> List[str]:
     # RAM % theo gw: ưu tiên cách đơn giản theo hrStorageIndex=1 (nếu thiết bị mapping như bạn nêu),
     # nếu không có dữ liệu thì fallback sang lọc theo mô tả "Physical memory".
     mem_expr_idx1 = (
-        "100 * avg by (gw) (hrStorageUsed{hrStorageIndex=\\\"1\\\"} / hrStorageSize{hrStorageIndex=\\\"1\\\"})"
+        '100 * avg by (gw) (hrStorageUsed{hrStorageIndex="1"} / hrStorageSize{hrStorageIndex="1"})'
     )
     mem_series = prom_query_range(mem_expr_idx1, start, end, step="5m")
     if not mem_series:
         mem_expr_descr = (
-            "100 * avg by (gw) ("
-            "hrStorageUsed{hrStorageType=\\\"1.3.6.1.2.1.25.2.1.2\\\"} / hrStorageSize{hrStorageType=\\\"1.3.6.1.2.1.25.2.1.2\\\"}"
-            ")"
+            '100 * avg by (gw) (hrStorageUsed{hrStorageType="1.3.6.1.2.1.25.2.1.2"} / hrStorageSize{hrStorageType="1.3.6.1.2.1.25.2.1.2"})'
         )
         mem_series = prom_query_range(mem_expr_descr, start, end, step="5m")
     mem_stats = series_stats_by_label(mem_series, "gw")
