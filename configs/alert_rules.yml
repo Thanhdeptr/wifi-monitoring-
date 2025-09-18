@@ -3,8 +3,8 @@ groups:
     rules:
       # SNMP Exporter Alerts
       - alert: HighCPUUsage
-        expr: snmp_host_cpu_usage > 80
-        for: 2m
+        expr: avg by (instance, device, gw) (hrProcessorLoad) > 85
+        for: 10m
         labels:
           severity: warning
         annotations:
@@ -12,8 +12,12 @@ groups:
           description: "Device {{ $labels.device }} ({{ $labels.gw }}) CPU usage is {{ $value }}%"
           
       - alert: HighMemoryUsage
-        expr: snmp_host_memory_usage > 85
-        for: 2m
+        expr: 100 * (
+          sum by (instance, device, gw) (hrStorageUsed{hrStorageType="1.3.6.1.2.1.25.2.1.2"} * hrStorageAllocationUnits{hrStorageType="1.3.6.1.2.1.25.2.1.2"})
+          /
+          sum by (instance, device, gw) (hrStorageSize{hrStorageType="1.3.6.1.2.1.25.2.1.2"} * hrStorageAllocationUnits{hrStorageType="1.3.6.1.2.1.25.2.1.2"})
+        ) > 80
+        for: 10m
         labels:
           severity: warning
         annotations:
@@ -21,7 +25,7 @@ groups:
           description: "Device {{ $labels.device }} ({{ $labels.gw }}) memory usage is {{ $value }}%"
           
       - alert: InterfaceHighTraffic
-        expr: rate(snmp_if_in_octets[5m]) > 100000000 or rate(snmp_if_out_octets[5m]) > 100000000
+        expr: (rate(ifHCInOctets[5m]) * 8) > 50000000 or (rate(ifHCOutOctets[5m]) * 8) > 500000000
         for: 3m
         labels:
           severity: warning
@@ -30,7 +34,7 @@ groups:
           description: "Interface {{ $labels.ifName }} on {{ $labels.device }} has high traffic: In={{ $value }}bps"
           
       - alert: InterfaceDown
-        expr: snmp_if_oper_status == 2
+        expr: max by (instance, device, gw, ifName, ifIndex) (ifOperStatus{ifOperStatus="up"}) == 0
         for: 1m
         labels:
           severity: critical
@@ -39,7 +43,7 @@ groups:
           description: "Interface {{ $labels.ifName }} on {{ $labels.device }} ({{ $labels.gw }}) is down"
           
       - alert: InterfaceHighErrors
-        expr: rate(snmp_if_in_errors[5m]) > 10 or rate(snmp_if_out_errors[5m]) > 10
+        expr: rate(ifInErrors[5m]) > 1 or rate(ifOutErrors[5m]) > 11
         for: 2m
         labels:
           severity: warning
@@ -50,7 +54,7 @@ groups:
   - name: speedtest_alerts
     rules:
       - alert: SlowDownloadSpeed
-        expr: speedtest_download_bps < 20000000  # 20 Mbps
+        expr: speedtest_download_bits_per_second < 20000000  # 20 Mbps
         for: 5m
         labels:
           severity: warning
@@ -59,7 +63,7 @@ groups:
           description: "WAN {{ $labels.line }} ({{ $labels.gateway }}) download speed is {{ $value | humanize }}bps ({{ $value | humanize1024 }}B/s)"
           
       - alert: SlowUploadSpeed
-        expr: speedtest_upload_bps < 5000000  # 5 Mbps
+        expr: speedtest_upload_bits_per_second < 20000000  # 20 Mbps
         for: 5m
         labels:
           severity: warning
@@ -68,7 +72,7 @@ groups:
           description: "WAN {{ $labels.line }} ({{ $labels.gateway }}) upload speed is {{ $value | humanize }}bps ({{ $value | humanize1024 }}B/s)"
           
       - alert: HighPingLatency
-        expr: speedtest_ping_latency > 100  # 100ms
+        expr: speedtest_ping_latency_milliseconds > 100  # 100ms
         for: 3m
         labels:
           severity: warning

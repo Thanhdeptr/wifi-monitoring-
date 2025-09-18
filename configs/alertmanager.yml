@@ -1,8 +1,8 @@
 global:
   smtp_smarthost: 'localhost:587'
-  smtp_from: 'alerts@yourcompany.com'
-  smtp_auth_username: 'alerts@yourcompany.com'
-  smtp_auth_password: 'your_password'
+  smtp_from: 'alertmailspam123@gmail.com'
+  smtp_auth_username: 'alertmailspam123@gmail.com'
+  smtp_auth_password: 'Htt05082004'
 
 route:
   group_by: ['alertname', 'device', 'gw']
@@ -25,49 +25,50 @@ route:
 receivers:
   - name: 'default-receiver'
     email_configs:
-      - to: 'admin@yourcompany.com'
+      - to: 'alertmailspam123@gmail.com'
         subject: '[{{ .Status | toUpper }}] {{ .GroupLabels.alertname }}'
-        body: |
+        html: |
+          <h2>Network Alert</h2>
           {{ range .Alerts }}
-          Alert: {{ .Annotations.summary }}
-          Description: {{ .Annotations.description }}
-          Device: {{ .Labels.device }}
-          Gateway: {{ .Labels.gw }}
-          Time: {{ .StartsAt }}
+          <p><strong>Alert:</strong> {{ .Annotations.summary }}</p>
+          <p><strong>Description:</strong> {{ .Annotations.description }}</p>
+          <p><strong>Device:</strong> {{ .Labels.device }}</p>
+          <p><strong>Gateway:</strong> {{ .Labels.gw }}</p>
+          <p><strong>Time:</strong> {{ .StartsAt }}</p>
+          <hr>
           {{ end }}
 
   - name: 'critical-alerts'
     email_configs:
-      - to: 'admin@yourcompany.com,oncall@yourcompany.com'
+      - to: 'alertmailspam123@gmail.com'
         subject: '[CRITICAL] {{ .GroupLabels.alertname }} - {{ .GroupLabels.device }}'
-        body: |
-          🚨 CRITICAL ALERT 🚨
-          
+        html: |
+          <h2 style="color: red;">🚨 CRITICAL ALERT 🚨</h2>
           {{ range .Alerts }}
-          Alert: {{ .Annotations.summary }}
-          Description: {{ .Annotations.description }}
-          Device: {{ .Labels.device }}
-          Gateway: {{ .Labels.gw }}
-          Severity: {{ .Labels.severity }}
-          Time: {{ .StartsAt }}
+          <p><strong>Alert:</strong> {{ .Annotations.summary }}</p>
+          <p><strong>Description:</strong> {{ .Annotations.description }}</p>
+          <p><strong>Device:</strong> {{ .Labels.device }}</p>
+          <p><strong>Gateway:</strong> {{ .Labels.gw }}</p>
+          <p><strong>Severity:</strong> {{ .Labels.severity }}</p>
+          <p><strong>Time:</strong> {{ .StartsAt }}</p>
+          <hr>
           {{ end }}
-          
-          Please investigate immediately!
+          <p><strong>Please investigate immediately!</strong></p>
 
   - name: 'warning-alerts'
     email_configs:
-      - to: 'admin@yourcompany.com'
+      - to: 'alertmailspam123@gmail.com'
         subject: '[WARNING] {{ .GroupLabels.alertname }} - {{ .GroupLabels.device }}'
-        body: |
-          ⚠️ WARNING ALERT ⚠️
-          
+        html: |
+          <h2 style="color: orange;">⚠️ WARNING ALERT ⚠️</h2>
           {{ range .Alerts }}
-          Alert: {{ .Annotations.summary }}
-          Description: {{ .Annotations.description }}
-          Device: {{ .Labels.device }}
-          Gateway: {{ .Labels.gw }}
-          Severity: {{ .Labels.severity }}
-          Time: {{ .StartsAt }}
+          <p><strong>Alert:</strong> {{ .Annotations.summary }}</p>
+          <p><strong>Description:</strong> {{ .Annotations.description }}</p>
+          <p><strong>Device:</strong> {{ .Labels.device }}</p>
+          <p><strong>Gateway:</strong> {{ .Labels.gw }}</p>
+          <p><strong>Severity:</strong> {{ .Labels.severity }}</p>
+          <p><strong>Time:</strong> {{ .StartsAt }}</p>
+          <hr>
           {{ end }}
 
 # Slack configuration (optional)

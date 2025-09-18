@@ -59,7 +59,7 @@ scrape_configs:
 
   # Speedtest monitoring - All WAN lines
   - job_name: 'speedtest'
-    scrape_interval: 20m  # Default interval for most WANs
+    scrape_interval: 25m  # Default interval for most WANs
     scrape_timeout: 2m
     static_configs:
       # WAN1 - 1h interval (will use 5m due to job-level setting)
