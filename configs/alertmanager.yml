@@ -26,7 +26,8 @@ receivers:
   - name: 'default-receiver'
     email_configs:
       - to: 'alertmailspam123@gmail.com'
-        subject: '[{{ .Status | toUpper }}] {{ .GroupLabels.alertname }}'
+        headers:
+          Subject: '[{{ .Status | toUpper }}] {{ .GroupLabels.alertname }}'
         html: |
           <h2>Network Alert</h2>
           {{ range .Alerts }}
@@ -41,7 +42,8 @@ receivers:
   - name: 'critical-alerts'
     email_configs:
       - to: 'alertmailspam123@gmail.com'
-        subject: '[CRITICAL] {{ .GroupLabels.alertname }} - {{ .GroupLabels.device }}'
+        headers:
+          Subject: '[CRITICAL] {{ .GroupLabels.alertname }} - {{ .GroupLabels.device }}'
         html: |
           <h2 style="color: red;">🚨 CRITICAL ALERT 🚨</h2>
           {{ range .Alerts }}
@@ -58,7 +60,8 @@ receivers:
   - name: 'warning-alerts'
     email_configs:
       - to: 'alertmailspam123@gmail.com'
-        subject: '[WARNING] {{ .GroupLabels.alertname }} - {{ .GroupLabels.device }}'
+        headers:
+          Subject: '[WARNING] {{ .GroupLabels.alertname }} - {{ .GroupLabels.device }}'
         html: |
           <h2 style="color: orange;">⚠️ WARNING ALERT ⚠️</h2>
           {{ range .Alerts }}
