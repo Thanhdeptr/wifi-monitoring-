@@ -83,17 +83,16 @@ def collect_cpu_ram_24h_by_gw() -> List[str]:
     # RAM % theo gw: ưu tiên cách đơn giản theo hrStorageIndex=1 (nếu thiết bị mapping như bạn nêu),
     # nếu không có dữ liệu thì fallback sang lọc theo mô tả "Physical memory".
     mem_expr_idx1 = (
-        "100 * ("
-        "sum by (gw)((hrStorageUsed{hrStorageIndex=\\\"1\\\"} * hrStorageAllocationUnits{hrStorageIndex=\\\"1\\\"})) / "
-        "sum by (gw)((hrStorageSize{hrStorageIndex=\\\"1\\\"} * hrStorageAllocationUnits{hrStorageIndex=\\\"1\\\"}))"
+        "100 * avg by (gw) ("
+        "hrStorageUsed{hrStorageIndex=\\\"1\\\"} / on (instance,hrStorageIndex) hrStorageSize{hrStorageIndex=\\\"1\\\"}"
         ")"
     )
     mem_series = prom_query_range(mem_expr_idx1, start, end, step="5m")
     if not mem_series:
         mem_expr_descr = (
-            "100 * ("
-            "sum by (gw)((hrStorageUsed * hrStorageAllocationUnits) and on (hrStorageIndex,instance) hrStorageDescr{hrStorageDescr=\\\"Physical memory\\\"}) / "
-            "sum by (gw)((hrStorageSize * hrStorageAllocationUnits) and on (hrStorageIndex,instance) hrStorageDescr{hrStorageDescr=\\\"Physical memory\\\"})"
+            "100 * avg by (gw) ("
+            "(hrStorageUsed and on (hrStorageIndex,instance) hrStorageDescr{hrStorageDescr=\\\"Physical memory\\\"}) / on (instance,hrStorageIndex) "
+            "(hrStorageSize and on (hrStorageIndex,instance) hrStorageDescr{hrStorageDescr=\\\"Physical memory\\\"})"
             ")"
         )
         mem_series = prom_query_range(mem_expr_descr, start, end, step="5m")
