@@ -16,10 +16,10 @@ scrape_configs:
       - targets: ['192.168.10.18:9100']
 
   # Network interfaces monitoring (WAN1-WAN4)
-  - job_name: 'er5120-interfaces'
+  - job_name: 'gateway-monitor'
     metrics_path: /snmp
-    scrape_timeout: 30s
-    scrape_interval: 30s
+    scrape_timeout: 9s
+    scrape_interval: 15s
     params:
       module: [if_mib]
       auth: [public_v2c]
@@ -29,6 +29,13 @@ scrape_configs:
           device: 'ER5120'
           site: 'HQ'
           job_type: 'interfaces'
+          gw: 'GW4'
+      - targets: ['192.168.10.5']
+        labels:
+          device: 'ER7206'
+          site: 'HQ'
+          job_type: 'interfaces'
+          gw: 'GW5'
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
@@ -39,7 +46,7 @@ scrape_configs:
 
   # Speedtest monitoring - All WAN lines
   - job_name: 'speedtest'
-    scrape_interval: 5m  # Default interval for most WANs
+    scrape_interval: 20m  # Default interval for most WANs
     scrape_timeout: 2m
     static_configs:
       # WAN1 - 1h interval (will use 5m due to job-level setting)
@@ -97,7 +104,7 @@ scrape_configs:
 
   # Omada Controller Exporter
   - job_name: 'omada-exporter'
-    scrape_interval: 30s
-    scrape_timeout: 10s
+    scrape_interval: 15s
+    scrape_timeout: 9s
     static_configs:
       - targets: ['192.168.10.18:9202']
