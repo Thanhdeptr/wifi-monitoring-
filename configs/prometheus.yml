@@ -2,6 +2,15 @@ global:
   scrape_interval: 30s
   evaluation_interval: 30s
 
+rule_files:
+  - "alert_rules.yml"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - 192.168.10.18:9093
+
 scrape_configs:
   - job_name: 'prometheus'
     static_configs:
@@ -24,17 +33,21 @@ scrape_configs:
       module: [if_mib]
       auth: [public_v2c]
     static_configs:
+      - targets: ['192.168.10.1']
+        labels:
+          device: 'ER605'
+          gw: 'GW1'
+      - targets: ['192.168.10.2']
+        labels:
+          device: 'LRT224'
+          gw: 'GW2'
       - targets: ['192.168.10.4']
         labels:
           device: 'ER5120'
-          site: 'HQ'
-          job_type: 'interfaces'
           gw: 'GW4'
       - targets: ['192.168.10.5']
         labels:
           device: 'ER7206'
-          site: 'HQ'
-          job_type: 'interfaces'
           gw: 'GW5'
     relabel_configs:
       - source_labels: [__address__]

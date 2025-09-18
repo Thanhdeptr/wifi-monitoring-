@@ -1,0 +1,115 @@
+groups:
+  - name: network_alerts
+    rules:
+      # SNMP Exporter Alerts
+      - alert: HighCPUUsage
+        expr: snmp_host_cpu_usage > 80
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage detected"
+          description: "Device {{ $labels.device }} ({{ $labels.gw }}) CPU usage is {{ $value }}%"
+          
+      - alert: HighMemoryUsage
+        expr: snmp_host_memory_usage > 85
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage detected"
+          description: "Device {{ $labels.device }} ({{ $labels.gw }}) memory usage is {{ $value }}%"
+          
+      - alert: InterfaceHighTraffic
+        expr: rate(snmp_if_in_octets[5m]) > 100000000 or rate(snmp_if_out_octets[5m]) > 100000000
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High interface traffic detected"
+          description: "Interface {{ $labels.ifName }} on {{ $labels.device }} has high traffic: In={{ $value }}bps"
+          
+      - alert: InterfaceDown
+        expr: snmp_if_oper_status == 2
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Interface is down"
+          description: "Interface {{ $labels.ifName }} on {{ $labels.device }} ({{ $labels.gw }}) is down"
+          
+      - alert: InterfaceHighErrors
+        expr: rate(snmp_if_in_errors[5m]) > 10 or rate(snmp_if_out_errors[5m]) > 10
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High interface errors detected"
+          description: "Interface {{ $labels.ifName }} on {{ $labels.device }} has high error rate: {{ $value }} errors/sec"
+
+  - name: speedtest_alerts
+    rules:
+      - alert: SlowDownloadSpeed
+        expr: speedtest_download_bps < 20000000  # 20 Mbps
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Slow download speed detected"
+          description: "WAN {{ $labels.line }} ({{ $labels.gateway }}) download speed is {{ $value | humanize }}bps ({{ $value | humanize1024 }}B/s)"
+          
+      - alert: SlowUploadSpeed
+        expr: speedtest_upload_bps < 5000000  # 5 Mbps
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Slow upload speed detected"
+          description: "WAN {{ $labels.line }} ({{ $labels.gateway }}) upload speed is {{ $value | humanize }}bps ({{ $value | humanize1024 }}B/s)"
+          
+      - alert: HighPingLatency
+        expr: speedtest_ping_latency > 100  # 100ms
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High ping latency detected"
+          description: "WAN {{ $labels.line }} ({{ $labels.gateway }}) ping latency is {{ $value }}ms"
+          
+      - alert: SpeedtestFailed
+        expr: speedtest_download_bps == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Speedtest failed"
+          description: "WAN {{ $labels.line }} ({{ $labels.gateway }}) speedtest failed - no data received"
+
+  - name: system_alerts
+    rules:
+      - alert: PrometheusDown
+        expr: up{job="prometheus"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Prometheus is down"
+          description: "Prometheus monitoring system is not responding"
+          
+      - alert: SNMPExporterDown
+        expr: up{job="snmp-exporter"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "SNMP Exporter is down"
+          description: "SNMP Exporter is not responding - network monitoring may be affected"
+          
+      - alert: GrafanaDown
+        expr: up{job="grafana"} == 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Grafana is down"
+          description: "Grafana dashboard is not accessible"
