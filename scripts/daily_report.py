@@ -80,14 +80,23 @@ def collect_cpu_ram_24h_by_gw() -> List[str]:
 
     cpu_stats = series_stats_by_label(cpu_series, "gw")
 
-    # RAM % theo gw
-    mem_expr = (
+    # RAM % theo gw: ưu tiên cách đơn giản theo hrStorageIndex=1 (nếu thiết bị mapping như bạn nêu),
+    # nếu không có dữ liệu thì fallback sang lọc theo mô tả "Physical memory".
+    mem_expr_idx1 = (
         "100 * ("
-        "sum by (gw)(hrStorageUsed{hrStorageType=\"1.3.6.1.2.1.25.2.1.2\"} * hrStorageAllocationUnits{hrStorageType=\"1.3.6.1.2.1.25.2.1.2\"}) / "
-        "sum by (gw)(hrStorageSize{hrStorageType=\"1.3.6.1.2.1.25.2.1.2\"} * hrStorageAllocationUnits{hrStorageType=\"1.3.6.1.2.1.25.2.1.2\"})"
+        "sum by (gw)((hrStorageUsed{hrStorageIndex=\\\"1\\\"} * hrStorageAllocationUnits{hrStorageIndex=\\\"1\\\"})) / "
+        "sum by (gw)((hrStorageSize{hrStorageIndex=\\\"1\\\"} * hrStorageAllocationUnits{hrStorageIndex=\\\"1\\\"}))"
         ")"
     )
-    mem_series = prom_query_range(mem_expr, start, end, step="5m")
+    mem_series = prom_query_range(mem_expr_idx1, start, end, step="5m")
+    if not mem_series:
+        mem_expr_descr = (
+            "100 * ("
+            "sum by (gw)((hrStorageUsed * hrStorageAllocationUnits) and on (hrStorageIndex,instance) hrStorageDescr{hrStorageDescr=\\\"Physical memory\\\"}) / "
+            "sum by (gw)((hrStorageSize * hrStorageAllocationUnits) and on (hrStorageIndex,instance) hrStorageDescr{hrStorageDescr=\\\"Physical memory\\\"})"
+            ")"
+        )
+        mem_series = prom_query_range(mem_expr_descr, start, end, step="5m")
     mem_stats = series_stats_by_label(mem_series, "gw")
 
     tstr = lambda ts: dt.datetime.utcfromtimestamp(ts).strftime("%H:%M") if ts else "-"
@@ -223,7 +232,6 @@ def build_report() -> str:
     sections += collect_cpu_ram_24h_by_gw()
     # 95th percentile WAN traffic removed per user request
     sections += [""] + collect_speedtest_by_line()
-    sections += [""] + collect_ping_by_gw()
     sections += [""] + collect_errors_by_gw()
     return "\n".join(sections)
 
