@@ -53,8 +53,10 @@ services:
     image: prom/mysqld-exporter:latest
     container_name: mysqld-exporter
     network_mode: host
-    environment:
-      DATA_SOURCE_NAME: "exporter:exporter_pwd@tcp(192.168.10.20:5306)/"
+    volumes:
+      - ./configs/mysql_exporter.my.cnf:/etc/mysql_exporter.my.cnf:ro
+    command:
+      - --config.my-cnf=/etc/mysql_exporter.my.cnf
     restart: unless-stopped
 
   loki:
