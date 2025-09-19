@@ -96,7 +96,7 @@ def collect_cpu_ram_24h_by_gw() -> List[str]:
     mem_stats = series_stats_by_label(mem_series, "gw")
 
     tstr = lambda ts: dt.datetime.utcfromtimestamp(ts).strftime("%H:%M") if ts else "-"
-    lines = ["*CPU & RAM theo Gateway (24h)*"]
+    lines = ["*CPU & RAM by Gateway (24h)*"]
     for gw in sorted(set(list(cpu_stats.keys()) + list(mem_stats.keys()))):
         c_avg, c_max, c_t = cpu_stats.get(gw, (0.0, 0.0, 0.0))
         m_avg, m_max, m_t = mem_stats.get(gw, (0.0, 0.0, 0.0))
@@ -134,7 +134,7 @@ def collect_speedtest_by_line() -> List[str]:
     # Average/min and timestamp per WAN line over last 24h
     end = dt.datetime.utcnow()
     start = end - dt.timedelta(hours=24)
-    lines = ["*Speedtest theo Line (24h)*"]
+    lines = ["*Speedtest by Line (24h)*"]
 
     wan_lines = [f"WAN{i}" for i in range(1, 9)]
     for line in wan_lines:
@@ -198,7 +198,7 @@ def collect_ping_by_gw() -> List[str]:
         return avg, vmax, tmax
 
     tstr = lambda ts: dt.datetime.utcfromtimestamp(ts).strftime("%H:%M") if ts else "-"
-    lines = ["*Ping theo Gateway (24h)*"]
+    lines = ["*Ping by Gateway (24h)*"]
     for gw in gateways:
         series = prom_query_range(
             f"speedtest_ping_latency_milliseconds{{gateway=\"{gw}\"}}",
@@ -216,7 +216,7 @@ def collect_errors_by_gw() -> List[str]:
         "sum by (gw) (increase(ifInErrors[24h]) + increase(ifOutErrors[24h]))"
     )
     err = {r["metric"].get("gw", ""): float(r["value"][1]) for r in prom_query(expr_err)}
-    lines = ["*Lỗi giao diện theo Gateway (24h)*"]
+    lines = ["*Interface Errors by Gateway (24h)*"]
     for gw in sorted(err.keys()):
         lines.append(f"• {gw}: errors {int(err.get(gw, 0))}")
     return lines

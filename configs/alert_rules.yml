@@ -3,16 +3,16 @@ groups:
     rules:
       # SNMP Exporter Alerts
       - alert: HighCPUUsage
-        expr: avg by (instance, device, gw) (hrProcessorLoad) > 85
+        expr: avg by (instance, gw) (hrProcessorLoad) > 85
         for: 10m
         labels:
           severity: warning
         annotations:
           summary: "High CPU usage detected"
-          description: "Device {{ $labels.device }} ({{ $labels.gw }}) CPU usage is {{ $value }}%"
+          description: "Device ({{ $labels.gw }}) CPU usage is {{ $value }}%"
           
       - alert: HighMemoryUsage
-        expr: 100 * (sum by (instance, device, gw) (hrStorageUsed{hrStorageType="1.3.6.1.2.1.25.2.1.2"} * hrStorageAllocationUnits{hrStorageType="1.3.6.1.2.1.25.2.1.2"}) / sum by (instance, device, gw) (hrStorageSize{hrStorageType="1.3.6.1.2.1.25.2.1.2"} * hrStorageAllocationUnits{hrStorageType="1.3.6.1.2.1.25.2.1.2"})) > 80
+        expr: 100 * (sum by (instance, gw) (hrStorageUsed{hrStorageType="1.3.6.1.2.1.25.2.1.2"} * hrStorageAllocationUnits{hrStorageType="1.3.6.1.2.1.25.2.1.2"}) / sum by (instance, device, gw) (hrStorageSize{hrStorageType="1.3.6.1.2.1.25.2.1.2"} * hrStorageAllocationUnits{hrStorageType="1.3.6.1.2.1.25.2.1.2"})) > 80
         for: 10m
         labels:
           severity: warning
@@ -21,8 +21,8 @@ groups:
           description: "Device {{ $labels.device }} ({{ $labels.gw }}) memory usage is {{ $value }}%"
           
       - alert: InterfaceHighTraffic
-        expr: (rate(ifHCInOctets[5m]) * 8) > 50000000 or (rate(ifHCOutOctets[5m]) * 8) > 500000000
-        for: 3m
+        expr: (rate(ifHCInOctets[5m]) * 8) > 500000000 or (rate(ifHCOutOctets[5m]) * 8) > 500000000
+        for: 5m
         labels:
           severity: warning
         annotations:
@@ -39,13 +39,51 @@ groups:
           description: "Interface {{ $labels.ifName }} on {{ $labels.device }} ({{ $labels.gw }}) is down"
           
       - alert: InterfaceHighErrors
-        expr: rate(ifInErrors[5m]) > 1 or rate(ifOutErrors[5m]) > 11
+        expr: rate(ifInErrors[1m]) > 1 or rate(ifOutErrors[1m]) > 1
         for: 2m
         labels:
           severity: warning
         annotations:
           summary: "High interface errors detected"
           description: "Interface {{ $labels.ifName }} on {{ $labels.device }} has high error rate: {{ $value }} errors/sec"
+
+      # Omada Exporter Alerts (dựa trên metric thực tế)
+      - alert: OmadaHighCPUUsage
+        expr: max by (device, device_type, site) (omada_device_cpu_percentage{job="omada-exporter"}) > 85
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Omada device high CPU usage"
+          description: "Device {{ $labels.device }} ({{ $labels.device_type }}) at site {{ $labels.site }} CPU {{ $value }}%"
+
+      - alert: OmadaHighMemoryUsage
+        expr: max by (device, device_type, site) (omada_device_mem_percentage{job="omada-exporter"}) > 80
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Omada device high memory usage"
+          description: "Device {{ $labels.device }} ({{ $labels.device_type }}) at site {{ $labels.site }} memory {{ $value }}%"
+
+      - alert: OmadaDeviceHighTraffic
+        expr: (rate(omada_device_download{job="omada-exporter"}[5m]) * 8 > 5e8)
+          or (rate(omada_device_upload{job="omada-exporter"}[5m]) * 8 > 5e8)
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Omada device high traffic"
+          description: "Device {{ $labels.device }} ({{ $labels.device_type }}) traffic {{ $value }}bps"
+
+      - alert: OmadaControllerHighStorageUsage
+        expr: 100 * (omada_controller_storage_used_bytes{job="omada-exporter"}) / (omada_controller_storage_used_bytes{job="omada-exporter"} + omada_controller_storage_available_bytes{job="omada-exporter"}) > 85
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Omada controller high storage usage"
+          description: "Controller {{ $labels.controller_name }} storage usage {{ $value }}% at site {{ $labels.site }}"
 
   - name: speedtest_alerts
     rules:
@@ -98,7 +136,7 @@ groups:
           
       - alert: SNMPExporterDown
         expr: up{job="snmp-exporter"} == 0
-        for: 2m
+        for: 1m
         labels:
           severity: critical
         annotations:
@@ -107,7 +145,7 @@ groups:
           
       - alert: GrafanaDown
         expr: up{job="grafana"} == 0
-        for: 2m
+        for: 1m
         labels:
           severity: warning
         annotations:
