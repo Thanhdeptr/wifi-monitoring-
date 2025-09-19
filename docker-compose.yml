@@ -49,6 +49,14 @@ services:
       - grafana_data:/var/lib/grafana
     restart: unless-stopped
 
+  mysqld-exporter:
+    image: prom/mysqld-exporter:latest
+    container_name: mysqld-exporter
+    network_mode: host
+    environment:
+      - DATA_SOURCE_NAME=exporter:exporter_pwd@(192.168.10.18:4309)/
+    restart: unless-stopped
+
   loki:
     image: grafana/loki:latest
     container_name: loki

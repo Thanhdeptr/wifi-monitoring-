@@ -24,6 +24,10 @@ scrape_configs:
     static_configs:
       - targets: ['192.168.10.18:9100']
 
+  - job_name: 'mysqld_exporter'
+    static_configs:
+      - targets: ['192.168.10.18:9104']
+
   # Network interfaces monitoring (WAN1-WAN4)
   - job_name: 'gateway-monitor'
     metrics_path: /snmp
