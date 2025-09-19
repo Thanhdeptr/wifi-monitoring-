@@ -50,17 +50,11 @@ services:
     restart: unless-stopped
 
   mysqld-exporter:
-    image: prom/mysqld-exporter:v0.11.0
+    image: prom/mysqld-exporter:latest
     container_name: mysqld-exporter
     network_mode: host
-    volumes:
-      - ./configs/mysql_exporter.my.cnf:/etc/mysql_exporter.my.cnf:ro
-    command:
-      - --config.my-cnf=/etc/mysql_exporter.my.cnf
-      - --no-collect.info_schema.innodb_cmp
-      - --no-collect.info_schema.innodb_cmpmem
-      - --no-collect.info_schema.query_response_time
-      - --no-collect.info_schema.userstats
+    environment:
+      DATA_SOURCE_NAME: "exporter:exporter_pwd@tcp(192.168.10.20:5306)/"
     restart: unless-stopped
 
   loki:
