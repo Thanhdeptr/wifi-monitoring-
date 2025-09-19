@@ -53,8 +53,10 @@ services:
     image: prom/mysqld-exporter:latest
     container_name: mysqld-exporter
     network_mode: host
-    environment:
-      - DATA_SOURCE_NAME=exporter:exporter_pwd@(192.168.10.18:4309)/?allowOldPasswords=true
+    volumes:
+      - ./configs/mysql_exporter.my.cnf:/root/.my.cnf:ro
+    command:
+      - --config.my-cnf=/root/.my.cnf
     restart: unless-stopped
 
   loki:
