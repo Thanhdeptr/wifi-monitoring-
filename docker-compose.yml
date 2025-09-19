@@ -54,7 +54,7 @@ services:
     container_name: mysqld-exporter
     network_mode: host
     environment:
-      - DATA_SOURCE_NAME=exporter:exporter_pwd@(192.168.10.18:4309)/
+      - DATA_SOURCE_NAME=exporter:exporter_pwd@(192.168.10.18:4309)/?allowOldPasswords=true
     restart: unless-stopped
 
   loki:
