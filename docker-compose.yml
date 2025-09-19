@@ -54,9 +54,9 @@ services:
     container_name: mysqld-exporter
     network_mode: host
     volumes:
-      - ./configs/mysql_exporter.my.cnf:/root/.my.cnf:ro
+      - ./configs/mysql_exporter.my.cnf:/etc/mysql_exporter.my.cnf:ro
     command:
-      - --config.my-cnf=/root/.my.cnf
+      - --config.my-cnf=/etc/mysql_exporter.my.cnf
     restart: unless-stopped
 
   loki:
