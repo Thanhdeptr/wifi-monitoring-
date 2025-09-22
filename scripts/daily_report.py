@@ -267,15 +267,9 @@ def build_report_blocks() -> List[Dict]:
         if not lines:
             return
         title, *rows = lines
-        blocks.append({"type": "section", "text": {"type": "mrkdwn", "text": title}})
         rows = [r for r in rows if r.strip()]
-        for group in _chunk_list(rows, 10):  # Slack allows up to 10 fields per section
-            blocks.append(
-                {
-                    "type": "section",
-                    "fields": [{"type": "mrkdwn", "text": r} for r in group],
-                }
-            )
+        body = "\n".join(rows)
+        blocks.append({"type": "section", "text": {"type": "mrkdwn", "text": f"{title}\n{body}"}})
 
     # CPU & RAM
     blocks.append({"type": "divider"})
@@ -289,14 +283,14 @@ def build_report_blocks() -> List[Dict]:
     blocks.append({"type": "divider"})
     add_section_from_lines(collect_errors_by_gw())
 
-    # Link button
+    # Link button (không hỗ trợ màu tùy ý trong Slack, dùng emoji cam)
     blocks.append(
         {
             "type": "actions",
             "elements": [
                 {
                     "type": "button",
-                    "text": {"type": "plain_text", "text": "Open Grafana dashboard", "emoji": True},
+                    "text": {"type": "plain_text", "text": "🟠 Open Grafana dashboard"},
                     "url": "http://192.168.10.18:3001/dashboards?tag=network",
                 }
             ],
@@ -305,7 +299,17 @@ def build_report_blocks() -> List[Dict]:
     return blocks
 
 
-def post_to_slack(text: str, blocks: Optional[List[Dict]] = None) -> None:
+def build_report_attachments() -> List[Dict]:
+    # Attachment có viền màu cam Grafana để nhấn mạnh link
+    return [
+        {
+            "color": "#F46800",
+            "text": "<http://192.168.10.18:3001/dashboards?tag=network|Open Grafana dashboard>",
+        }
+    ]
+
+
+def post_to_slack(text: str, blocks: Optional[List[Dict]] = None, attachments: Optional[List[Dict]] = None) -> None:
     # If webhook is not set, just print to terminal (dry-run mode)
     if not SLACK_WEBHOOK_URL:
         print(text)
@@ -313,6 +317,8 @@ def post_to_slack(text: str, blocks: Optional[List[Dict]] = None) -> None:
     payload: Dict = {"text": text}
     if blocks:
         payload["blocks"] = blocks
+    if attachments:
+        payload["attachments"] = attachments
     resp = requests.post(
         SLACK_WEBHOOK_URL,
         data=json.dumps(payload),
@@ -326,7 +332,8 @@ def main() -> int:
     try:
         report = build_report()
         blocks = build_report_blocks()
-        post_to_slack(report, blocks)
+        attachments = build_report_attachments()
+        post_to_slack(report, blocks, attachments)
         print("Report sent to Slack.")
         return 0
     except Exception as exc:  # noqa: BLE001
