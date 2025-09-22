@@ -245,6 +245,8 @@ def build_report() -> str:
     # 95th percentile WAN traffic removed per user request
     sections += [""] + collect_speedtest_by_line()
     sections += [""] + collect_errors_by_gw()
+    sections += [""]
+    sections += ["<http://192.168.10.18:3001/dashboards?tag=network|Open Grafana dashboard>"]
     return "\n".join(sections)
 
 
