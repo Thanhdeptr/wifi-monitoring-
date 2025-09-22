@@ -30,13 +30,16 @@ groups:
           description: "Interface {{ $labels.ifName }} on {{ $labels.device }} has high traffic: In={{ $value }}bps"
           
       - alert: InterfaceDown
-        expr: max by (instance, device, gw, ifName, ifIndex) (ifOperStatus{ifOperStatus="up"}) == 0
-        for: 1m
+        expr: |
+          (max by (instance, device, gw, ifName, ifIndex) (ifOperStatus{ifOperStatus="up"}) == 0)
+          and on (instance, device, gw, ifName, ifIndex)
+          (changes(max by (instance, device, gw, ifName, ifIndex) (ifOperStatus{ifOperStatus="up"})[1m]) > 0)
+        for: 30s
         labels:
           severity: critical
         annotations:
-          summary: "Interface is down"
-          description: "Interface {{ $labels.ifName }} on {{ $labels.device }} ({{ $labels.gw }}) is down"
+          summary: "Interface just went down"
+          description: "Interface {{ $labels.ifName }} on {{ $labels.device }} ({{ $labels.gw }}) transitioned from UP to DOWN"
           
       - alert: InterfaceHighErrors
         expr: rate(ifInErrors[1m]) > 1 or rate(ifOutErrors[1m]) > 1

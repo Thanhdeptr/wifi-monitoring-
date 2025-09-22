@@ -1,9 +1,5 @@
 global:
-  smtp_smarthost: 'localhost:587'
-  smtp_from: 'alertmailspam123@gmail.com'
-  smtp_auth_username: 'alertmailspam123@gmail.com'
-  smtp_auth_password: 'Htt05082004'
-
+  slack_api_url: 'https://hooks.slack.com/services/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'
 route:
   group_by: ['alertname', 'device', 'gw']
   group_wait: 10s
@@ -24,60 +20,52 @@ route:
 
 receivers:
   - name: 'default-receiver'
-    email_configs:
-      - to: 'alertmailspam123@gmail.com'
-        headers:
-          Subject: '[{{ .Status | toUpper }}] {{ .GroupLabels.alertname }}'
-        html: |
-          <h2>Network Alert</h2>
-          {{ range .Alerts }}
-          <p><strong>Alert:</strong> {{ .Annotations.summary }}</p>
-          <p><strong>Description:</strong> {{ .Annotations.description }}</p>
-          <p><strong>Device:</strong> {{ .Labels.device }}</p>
-          <p><strong>Gateway:</strong> {{ .Labels.gw }}</p>
-          <p><strong>Time:</strong> {{ .StartsAt }}</p>
-          <hr>
-          {{ end }}
+    slack_configs:
+      -
+        title: '[{{ .Status | toUpper }}] {{ .GroupLabels.alertname }}'
+        text: |-
+          {{ range .Alerts -}}
+          *Alert*: {{ .Annotations.summary }}
+          *Description*: {{ .Annotations.description }}
+          *Device*: {{ .Labels.device }}
+          *Gateway*: {{ .Labels.gw }}
+          *Time*: {{ .StartsAt }}
+          ---
+          {{- end }}
+        send_resolved: true
 
   - name: 'critical-alerts'
-    email_configs:
-      - to: 'alertmailspam123@gmail.com'
-        headers:
-          Subject: '[CRITICAL] {{ .GroupLabels.alertname }} - {{ .GroupLabels.device }}'
-        html: |
-          <h2 style="color: red;">🚨 CRITICAL ALERT 🚨</h2>
-          {{ range .Alerts }}
-          <p><strong>Alert:</strong> {{ .Annotations.summary }}</p>
-          <p><strong>Description:</strong> {{ .Annotations.description }}</p>
-          <p><strong>Device:</strong> {{ .Labels.device }}</p>
-          <p><strong>Gateway:</strong> {{ .Labels.gw }}</p>
-          <p><strong>Severity:</strong> {{ .Labels.severity }}</p>
-          <p><strong>Time:</strong> {{ .StartsAt }}</p>
-          <hr>
-          {{ end }}
-          <p><strong>Please investigate immediately!</strong></p>
+    slack_configs:
+      -
+        title: 'CRITICAL: {{ .GroupLabels.alertname }} - {{ .GroupLabels.device }}'
+        text: |-
+          {{ range .Alerts -}}
+          *Alert*: {{ .Annotations.summary }}
+          *Description*: {{ .Annotations.description }}
+          *Device*: {{ .Labels.device }}
+          *Gateway*: {{ .Labels.gw }}
+          *Severity*: {{ .Labels.severity }}
+          *Time*: {{ .StartsAt }}
+          ---
+          {{- end }}
+        color: "#ff0000"
+        send_resolved: true
 
   - name: 'warning-alerts'
-    email_configs:
-      - to: 'alertmailspam123@gmail.com'
-        headers:
-          Subject: '[WARNING] {{ .GroupLabels.alertname }} - {{ .GroupLabels.device }}'
-        html: |
-          <h2 style="color: orange;">⚠️ WARNING ALERT ⚠️</h2>
-          {{ range .Alerts }}
-          <p><strong>Alert:</strong> {{ .Annotations.summary }}</p>
-          <p><strong>Description:</strong> {{ .Annotations.description }}</p>
-          <p><strong>Device:</strong> {{ .Labels.device }}</p>
-          <p><strong>Gateway:</strong> {{ .Labels.gw }}</p>
-          <p><strong>Severity:</strong> {{ .Labels.severity }}</p>
-          <p><strong>Time:</strong> {{ .StartsAt }}</p>
-          <hr>
-          {{ end }}
+    slack_configs:
+      -
+        title: 'WARNING: {{ .GroupLabels.alertname }} - {{ .GroupLabels.device }}'
+        text: |-
+          {{ range .Alerts -}}
+          *Alert*: {{ .Annotations.summary }}
+          *Description*: {{ .Annotations.description }}
+          *Device*: {{ .Labels.device }}
+          *Gateway*: {{ .Labels.gw }}
+          *Severity*: {{ .Labels.severity }}
+          *Time*: {{ .StartsAt }}
+          ---
+          {{- end }}
+        color: "#ffa500"
+        send_resolved: true
 
-# Slack configuration (optional)
-#  - name: 'slack-alerts'
-#    slack_configs:
-#      - api_url: 'YOUR_SLACK_WEBHOOK_URL'
-#        channel: '#alerts'
-#        title: 'Network Alert'
-#        text: '{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+
