@@ -21,7 +21,7 @@ route:
 receivers:
   - name: 'default-receiver'
     slack_configs:
-      -
+      - channel: '#hien-test-channel-bot'
         title: '[{{ .Status | toUpper }}] {{ .GroupLabels.alertname }}'
         text: |-
           {{ range .Alerts -}}
@@ -36,7 +36,7 @@ receivers:
 
   - name: 'critical-alerts'
     slack_configs:
-      -
+      - channel: '#hien-test-channel-bot'
         title: 'CRITICAL: {{ .GroupLabels.alertname }} - {{ .GroupLabels.device }}'
         text: |-
           {{ range .Alerts -}}
@@ -53,7 +53,7 @@ receivers:
 
   - name: 'warning-alerts'
     slack_configs:
-      -
+      - channel: '#hien-test-channel-bot'
         title: 'WARNING: {{ .GroupLabels.alertname }} - {{ .GroupLabels.device }}'
         text: |-
           {{ range .Alerts -}}
