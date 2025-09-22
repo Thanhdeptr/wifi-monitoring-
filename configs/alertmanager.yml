@@ -1,5 +1,5 @@
 global:
-  slack_api_url: 'https://hooks.slack.com/services/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'
+  slack_api_url_file: '/run/secrets/slack_webhook'
 route:
   group_by: ['alertname', 'device', 'gw']
   group_wait: 10s

@@ -29,6 +29,7 @@ services:
     network_mode: host
     volumes:
       - ./configs/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - ./secrets/slack_webhook:/run/secrets/slack_webhook:ro
       - alertmanager_data:/alertmanager
     command:
       - --config.file=/etc/alertmanager/alertmanager.yml
