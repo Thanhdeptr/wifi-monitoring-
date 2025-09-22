@@ -28,6 +28,10 @@ scrape_configs:
     static_configs:
       - targets: ['192.168.10.18:9104']
 
+  - job_name: 'grafana'
+    static_configs:
+      - targets: ['192.168.10.18:3001']
+
   # Network interfaces monitoring (WAN1-WAN4)
   - job_name: 'gateway-monitor'
     metrics_path: /snmp
