@@ -313,14 +313,21 @@ def post_to_slack(text: str, blocks: Optional[List[Dict]] = None, attachments: O
 
 def main() -> int:
     try:
+        start_ts = dt.datetime.now()
+        print(f"[{start_ts:%Y-%m-%d %H:%M:%S}] Cron start", flush=True)
+
         report = build_report()
         blocks = build_report_blocks()
         attachments = build_report_attachments()
         post_to_slack(report, blocks, attachments)
-        print("Report sent to Slack.")
+
+        end_ts = dt.datetime.now()
+        duration_s = (end_ts - start_ts).total_seconds()
+        print(f"[{end_ts:%Y-%m-%d %H:%M:%S}] Report sent to Slack. duration={duration_s:.1f}s", flush=True)
         return 0
     except Exception as exc:  # noqa: BLE001
-        print(f"Failed: {exc}")
+        now_ts = dt.datetime.now()
+        print(f"[{now_ts:%Y-%m-%d %H:%M:%S}] Failed: {exc}", flush=True)
         return 1
 
 
