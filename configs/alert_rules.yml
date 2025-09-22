@@ -148,7 +148,7 @@ groups:
           
       - alert: GrafanaDown
         expr: up{job="grafana"} == 0
-        for: 1m
+        for: 5s
         labels:
           severity: warning
         annotations:
