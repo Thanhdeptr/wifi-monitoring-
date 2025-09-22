@@ -245,7 +245,6 @@ def build_report() -> str:
     parts.extend(collect_cpu_ram_24h_by_gw())
     parts.extend(collect_speedtest_by_line())
     parts.extend(collect_errors_by_gw())
-    parts.append("<http://192.168.10.18:3001/dashboards?tag=network|Open Grafana dashboard>")
     return "\n".join(parts)
 
 
