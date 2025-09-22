@@ -2,7 +2,7 @@ import os
 import sys
 import json
 import datetime as dt
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
 
 import requests
 
@@ -250,12 +250,69 @@ def build_report() -> str:
     return "\n".join(sections)
 
 
-def post_to_slack(text: str) -> None:
+def _chunk_list(items: List[str], size: int) -> List[List[str]]:
+    return [items[i : i + size] for i in range(0, len(items), size)]
+
+
+def build_report_blocks() -> List[Dict]:
+    today = dt.datetime.now().strftime("%Y-%m-%d")
+    blocks: List[Dict] = [
+        {
+            "type": "header",
+            "text": {"type": "plain_text", "text": f"Daily Network Report — {today}", "emoji": True},
+        }
+    ]
+
+    def add_section_from_lines(lines: List[str]) -> None:
+        if not lines:
+            return
+        title, *rows = lines
+        blocks.append({"type": "section", "text": {"type": "mrkdwn", "text": title}})
+        rows = [r for r in rows if r.strip()]
+        for group in _chunk_list(rows, 10):  # Slack allows up to 10 fields per section
+            blocks.append(
+                {
+                    "type": "section",
+                    "fields": [{"type": "mrkdwn", "text": r} for r in group],
+                }
+            )
+
+    # CPU & RAM
+    blocks.append({"type": "divider"})
+    add_section_from_lines(collect_cpu_ram_24h_by_gw())
+
+    # Speedtest by Line
+    blocks.append({"type": "divider"})
+    add_section_from_lines(collect_speedtest_by_line())
+
+    # Interface Errors
+    blocks.append({"type": "divider"})
+    add_section_from_lines(collect_errors_by_gw())
+
+    # Link button
+    blocks.append(
+        {
+            "type": "actions",
+            "elements": [
+                {
+                    "type": "button",
+                    "text": {"type": "plain_text", "text": "Open Grafana dashboard", "emoji": True},
+                    "url": "http://192.168.10.18:3001/dashboards?tag=network",
+                }
+            ],
+        }
+    )
+    return blocks
+
+
+def post_to_slack(text: str, blocks: Optional[List[Dict]] = None) -> None:
     # If webhook is not set, just print to terminal (dry-run mode)
     if not SLACK_WEBHOOK_URL:
         print(text)
         return
-    payload = {"text": text}
+    payload: Dict = {"text": text}
+    if blocks:
+        payload["blocks"] = blocks
     resp = requests.post(
         SLACK_WEBHOOK_URL,
         data=json.dumps(payload),
@@ -268,7 +325,8 @@ def post_to_slack(text: str) -> None:
 def main() -> int:
     try:
         report = build_report()
-        post_to_slack(report)
+        blocks = build_report_blocks()
+        post_to_slack(report, blocks)
         print("Report sent to Slack.")
         return 0
     except Exception as exc:  # noqa: BLE001
