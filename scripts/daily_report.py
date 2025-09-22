@@ -11,6 +11,22 @@ PROMETHEUS_URL = os.getenv("PROMETHEUS_URL", "http://192.168.10.18:9090")
 SLACK_WEBHOOK_URL = os.getenv("SLACK_WEBHOOK_URL", "")
 
 
+def _read_slack_webhook_from_secret() -> str:
+    """Read Slack webhook URL from secrets/slack_webhook relative to this file."""
+    try:
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        secret_path = os.path.join(base_dir, "..", "secrets", "slack_webhook")
+        with open(secret_path, "r", encoding="utf-8") as fh:
+            return fh.read().strip()
+    except Exception:
+        return ""
+
+
+# Fallback: if env var is empty, read from secrets file
+if not SLACK_WEBHOOK_URL:
+    SLACK_WEBHOOK_URL = _read_slack_webhook_from_secret()
+
+
 def prom_query(expr: str) -> List[Dict]:
     """Run an instant query against Prometheus and return result vector."""
     resp = requests.get(
