@@ -11,12 +11,12 @@ route:
         severity: critical
       receiver: 'critical-alerts'
       group_wait: 5s
-      repeat_interval: 30m
+      repeat_interval: 10m
     - match:
         severity: warning
       receiver: 'warning-alerts'
       group_wait: 30s
-      repeat_interval: 2h
+      repeat_interval: 30m
 
 receivers:
   - name: 'default-receiver'
@@ -25,11 +25,12 @@ receivers:
         title: '[{{ .Status | toUpper }}] {{ .GroupLabels.alertname }}'
         text: |-
           {{ range .Alerts -}}
+          *Status*: {{ .Status | toUpper }}
           *Alert*: {{ .Annotations.summary }}
           *Description*: {{ .Annotations.description }}
           *Device*: {{ .Labels.device }}
           *Gateway*: {{ .Labels.gw }}
-          *Time*: {{ .StartsAt }}
+          {{ if eq $.Status "resolved" }}*Resolved at*: <!date^{{ .EndsAt.Unix }}^{date_num} {time}|{{ .EndsAt }}>{{ else }}*Starts at*: <!date^{{ .StartsAt.Unix }}^{date_num} {time}|{{ .StartsAt }}>{{ end }}
           ---
           {{- end }}
         send_resolved: true
@@ -37,35 +38,37 @@ receivers:
   - name: 'critical-alerts'
     slack_configs:
       - channel: '#hien-test-channel-bot'
-        title: 'CRITICAL: {{ .GroupLabels.alertname }} - {{ .GroupLabels.device }}'
+        title: '{{ if eq .Status "resolved" }}RESOLVED ✅{{ else }}CRITICAL 🚨{{ end }}: {{ .GroupLabels.alertname }} - {{ .GroupLabels.device }}'
         text: |-
           {{ range .Alerts -}}
+          *Status*: {{ if eq $.Status "resolved" }}RESOLVED{{ else }}FIRING{{ end }}
           *Alert*: {{ .Annotations.summary }}
           *Description*: {{ .Annotations.description }}
           *Device*: {{ .Labels.device }}
           *Gateway*: {{ .Labels.gw }}
           *Severity*: {{ .Labels.severity }}
-          *Time*: {{ .StartsAt }}
+          {{ if eq $.Status "resolved" }}*Resolved at*: <!date^{{ .EndsAt.Unix }}^{date_num} {time}|{{ .EndsAt }}>{{ else }}*Starts at*: <!date^{{ .StartsAt.Unix }}^{date_num} {time}|{{ .StartsAt }}>{{ end }}
           ---
           {{- end }}
-        color: "#ff0000"
+        color: '{{ if eq .Status "resolved" }}#36a64f{{ else }}#ff0000{{ end }}'
         send_resolved: true
 
   - name: 'warning-alerts'
     slack_configs:
       - channel: '#hien-test-channel-bot'
-        title: 'WARNING: {{ .GroupLabels.alertname }} - {{ .GroupLabels.device }}'
+        title: '{{ if eq .Status "resolved" }}RESOLVED ✅{{ else }}WARNING ⚠️{{ end }}: {{ .GroupLabels.alertname }} - {{ .GroupLabels.device }}'
         text: |-
           {{ range .Alerts -}}
+          *Status*: {{ if eq $.Status "resolved" }}RESOLVED{{ else }}FIRING{{ end }}
           *Alert*: {{ .Annotations.summary }}
           *Description*: {{ .Annotations.description }}
           *Device*: {{ .Labels.device }}
           *Gateway*: {{ .Labels.gw }}
           *Severity*: {{ .Labels.severity }}
-          *Time*: {{ .StartsAt }}
+          {{ if eq $.Status "resolved" }}*Resolved at*: <!date^{{ .EndsAt.Unix }}^{date_num} {time}|{{ .EndsAt }}>{{ else }}*Starts at*: <!date^{{ .StartsAt.Unix }}^{date_num} {time}|{{ .StartsAt }}>{{ end }}
           ---
           {{- end }}
-        color: "#ffa500"
+        color: '{{ if eq .Status "resolved" }}#36a64f{{ else }}#ffa500{{ end }}'
         send_resolved: true
 
 
