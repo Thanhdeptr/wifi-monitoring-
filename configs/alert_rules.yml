@@ -33,8 +33,8 @@ groups:
         expr: |
           (max by (instance, device, gw, ifName, ifIndex) (ifOperStatus{ifOperStatus="up"}) == 0)
           and on (instance, device, gw, ifName, ifIndex)
-          (changes(max by (instance, device, gw, ifName, ifIndex) (ifOperStatus{ifOperStatus="up"})[1m]) > 0)
-        for: 30s
+          (sum by (instance, device, gw, ifName, ifIndex) (changes(ifOperStatus{ifOperStatus="up"}[5m])) > 0)
+        for: 1m
         labels:
           severity: critical
         annotations:
