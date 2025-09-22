@@ -117,7 +117,7 @@ def collect_cpu_ram_24h_by_gw() -> List[str]:
         c_avg, c_max, c_t = cpu_stats.get(gw, (0.0, 0.0, 0.0))
         m_avg, m_max, m_t = mem_stats.get(gw, (0.0, 0.0, 0.0))
         lines.append(
-            f"• {gw}: CPU avg {format_value(c_avg, '%')}, max {format_value(c_max, '%')} @ {tstr(c_t)} | "
+            f"- {gw}: CPU avg {format_value(c_avg, '%')}, max {format_value(c_max, '%')} @ {tstr(c_t)} | "
             f"RAM avg {format_value(m_avg, '%')}, max {format_value(m_max, '%')} @ {tstr(m_t)}"
         )
     return lines
@@ -138,7 +138,7 @@ def collect_mem_24h() -> List[str]:
     for key in sorted(avg_res):
         device, gw = key
         lines.append(
-            f"• {device} [{gw}]: avg {format_value(avg_res[key], '%')}, max {format_value(max_res.get(key, 0.0), '%')}"
+            f"- {device} [{gw}]: avg {format_value(avg_res[key], '%')}, max {format_value(max_res.get(key, 0.0), '%')}"
         )
     return lines
 
@@ -188,7 +188,7 @@ def collect_speedtest_by_line() -> List[str]:
 
         tmin_str = lambda ts: dt.datetime.utcfromtimestamp(ts).strftime("%H:%M") if ts else "-"
         lines.append(
-            f"• {line}: DL avg {format_value(dl_avg, 'bps')}, min {format_value(dl_min, 'bps')} @ {tmin_str(dl_t)} | "
+            f"- {line}: DL avg {format_value(dl_avg, 'bps')}, min {format_value(dl_min, 'bps')} @ {tmin_str(dl_t)} | "
             f"UL avg {format_value(ul_avg, 'bps')}, min {format_value(ul_min, 'bps')} @ {tmin_str(ul_t)} | "
             f"Ping avg {ping_avg:.1f} ms"
         )
@@ -222,7 +222,7 @@ def collect_ping_by_gw() -> List[str]:
             end,
         )
         avg, vmax, tmax = stats(series)
-        lines.append(f"• {gw}: avg {avg:.1f} ms, max {vmax:.1f} ms @ {tstr(tmax)}")
+        lines.append(f"- {gw}: avg {avg:.1f} ms, max {vmax:.1f} ms @ {tstr(tmax)}")
     return lines
 
 
@@ -234,20 +234,19 @@ def collect_errors_by_gw() -> List[str]:
     err = {r["metric"].get("gw", ""): float(r["value"][1]) for r in prom_query(expr_err)}
     lines = ["*Interface Errors by Gateway (24h)*"]
     for gw in sorted(err.keys()):
-        lines.append(f"• {gw}: errors {int(err.get(gw, 0))}")
+        lines.append(f"- {gw}: errors {int(err.get(gw, 0))}")
     return lines
 
 
 def build_report() -> str:
     today = dt.datetime.now().strftime("%Y-%m-%d")
-    sections: List[str] = [f"*Daily Network Report* — {today}"]
-    sections += collect_cpu_ram_24h_by_gw()
-    # 95th percentile WAN traffic removed per user request
-    sections += [""] + collect_speedtest_by_line()
-    sections += [""] + collect_errors_by_gw()
-    sections += [""]
-    sections += ["<http://192.168.10.18:3001/dashboards?tag=network|Open Grafana dashboard>"]
-    return "\n".join(sections)
+    parts: List[str] = []
+    parts.append(f"*Daily Network Report* — {today}")
+    parts.extend(collect_cpu_ram_24h_by_gw())
+    parts.extend(collect_speedtest_by_line())
+    parts.extend(collect_errors_by_gw())
+    parts.append("<http://192.168.10.18:3001/dashboards?tag=network|Open Grafana dashboard>")
+    return "\n".join(parts)
 
 
 def _chunk_list(items: List[str], size: int) -> List[List[str]]:
@@ -282,21 +281,6 @@ def build_report_blocks() -> List[Dict]:
     # Interface Errors
     blocks.append({"type": "divider"})
     add_section_from_lines(collect_errors_by_gw())
-
-    # Link button (không hỗ trợ màu tùy ý trong Slack, dùng emoji cam)
-    blocks.append(
-        {
-            "type": "actions",
-            "elements": [
-                {
-                    "type": "button",
-                    "text": {"type": "plain_text", "text": "🟠 Open Grafana dashboard"},
-                    "url": "http://192.168.10.18:3001/dashboards?tag=network",
-                }
-            ],
-        }
-    )
-    return blocks
 
 
 def build_report_attachments() -> List[Dict]:
