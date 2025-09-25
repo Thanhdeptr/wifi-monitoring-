@@ -119,7 +119,7 @@ groups:
           
       - alert: SpeedtestFailed
         expr: speedtest_download_bits_per_second == 0
-        for: 2m
+        for: 10m
         labels:
           severity: critical
         annotations:

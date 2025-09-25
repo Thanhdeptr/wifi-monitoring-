@@ -16,7 +16,7 @@ services:
     container_name: speedtest2
     network_mode: "host"
     environment:
-      SPEEDTEST_ARGS: "-i 192.168.10.161"
+      SPEEDTEST_ARGS: "-i 192.168.10.161 --verbose"
       SPEEDTEST_SERVER: 26853
       SPEEDTEST_PORT: 9799
 
@@ -25,7 +25,7 @@ services:
     container_name: speedtest3
     network_mode: "host"
     environment:
-      SPEEDTEST_ARGS: "-i 192.168.10.162"
+      SPEEDTEST_ARGS: "-i 192.168.10.162 --verbose"
       SPEEDTEST_SERVER: 26853
       SPEEDTEST_PORT: 9800
 
@@ -34,7 +34,7 @@ services:
     container_name: speedtest4
     network_mode: "host"
     environment:
-      SPEEDTEST_ARGS: "-i 192.168.10.163"
+      SPEEDTEST_ARGS: "-i 192.168.10.163 --verbose"
       SPEEDTEST_SERVER: 26853
       SPEEDTEST_PORT: 9801
 
