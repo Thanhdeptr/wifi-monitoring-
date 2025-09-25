@@ -97,7 +97,7 @@ groups:
           severity: warning
         annotations:
           summary: "Slow download speed detected"
-          description: "WAN {{ $labels.line }} ({{ $labels.gateway }}) download speed is {{ $value | humanize }}bps ({{ $value | humanize1024 }}B/s)"
+          description: "{{ $labels.line }} ({{ $labels.gateway }}) download speed is {{ $value | humanize }}bps ({{ $value | humanize1024 }}B/s)"
           
       - alert: SlowUploadSpeed
         expr: speedtest_upload_bits_per_second < 20000000  # 20 Mbps
@@ -106,7 +106,7 @@ groups:
           severity: warning
         annotations:
           summary: "Slow upload speed detected"
-          description: "WAN {{ $labels.line }} ({{ $labels.gateway }}) upload speed is {{ $value | humanize }}bps ({{ $value | humanize1024 }}B/s)"
+          description: "{{ $labels.line }} ({{ $labels.gateway }}) upload speed is {{ $value | humanize }}bps ({{ $value | humanize1024 }}B/s)"
           
       - alert: HighPingLatency
         expr: speedtest_ping_latency_milliseconds > 100  # 100ms
@@ -115,7 +115,7 @@ groups:
           severity: warning
         annotations:
           summary: "High ping latency detected"
-          description: "WAN {{ $labels.line }} ({{ $labels.gateway }}) ping latency is {{ $value }}ms"
+          description: "{{ $labels.line }} ({{ $labels.gateway }}) ping latency is {{ $value }}ms"
           
       - alert: SpeedtestFailed
         expr: speedtest_download_bits_per_second == 0
@@ -124,7 +124,7 @@ groups:
           severity: critical
         annotations:
           summary: "Speedtest failed"
-          description: "WAN {{ $labels.line }} ({{ $labels.gateway }}) speedtest failed - no data received"
+          description: "{{ $labels.line }} ({{ $labels.gateway }}) speedtest failed - no data received"
 
   - name: system_alerts
     rules:
