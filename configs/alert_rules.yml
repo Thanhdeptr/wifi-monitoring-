@@ -130,7 +130,7 @@ groups:
     rules:
       - alert: PrometheusDown
         expr: up{job="prometheus"} == 0
-        for: 5s #for testing purpose
+        for: 30s #for testing purpose
         labels:
           severity: critical
         annotations:
@@ -139,7 +139,7 @@ groups:
           
       - alert: SNMPExporterDown
         expr: up{job="snmp-exporter"} == 0
-        for: 5s #for testing purpose
+        for: 30s #for testing purpose
         labels:
           severity: critical
         annotations:
@@ -148,7 +148,7 @@ groups:
           
       - alert: GrafanaDown
         expr: up{job="grafana"} == 0
-        for: 5s #for testing purpose
+        for: 30s #for testing purpose
         labels:
           severity: warning
         annotations:
