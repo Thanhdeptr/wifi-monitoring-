@@ -22,7 +22,7 @@ services:
       - NET_ADMIN
       - NET_RAW
     environment:
-      SPEEDTEST_ARGS: "--source 192.168.10.161 --verbose"
+      SPEEDTEST_ARGS: "--source 192.168.10.161"
       SPEEDTEST_SERVER: 26853
       SPEEDTEST_PORT: 9799
 
@@ -34,7 +34,7 @@ services:
       - NET_ADMIN
       - NET_RAW
     environment:
-      SPEEDTEST_ARGS: "--source 192.168.10.162 --verbose"
+      SPEEDTEST_ARGS: "--source 192.168.10.162"
       SPEEDTEST_SERVER: 26853
       SPEEDTEST_PORT: 9800
 
@@ -46,7 +46,7 @@ services:
       - NET_ADMIN
       - NET_RAW
     environment:
-      SPEEDTEST_ARGS: "--source 192.168.10.163 --verbose"
+      SPEEDTEST_ARGS: "--source 192.168.10.163"
       SPEEDTEST_SERVER: 26853
       SPEEDTEST_PORT: 9801
 
