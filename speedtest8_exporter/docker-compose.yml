@@ -8,6 +8,9 @@ services:
     cap_add:
       - NET_ADMIN
       - NET_RAW
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     environment:
       SPEEDTEST_ARGS: "--source 192.168.10.160"
       SPEEDTEST_SERVER: 26853
@@ -21,6 +24,9 @@ services:
     cap_add:
       - NET_ADMIN
       - NET_RAW
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     environment:
       SPEEDTEST_ARGS: "--source 192.168.10.161"
       SPEEDTEST_SERVER: 26853
@@ -33,6 +39,9 @@ services:
     cap_add:
       - NET_ADMIN
       - NET_RAW
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     environment:
       SPEEDTEST_ARGS: "--source 192.168.10.162"
       SPEEDTEST_SERVER: 26853
@@ -45,6 +54,9 @@ services:
     cap_add:
       - NET_ADMIN
       - NET_RAW
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     environment:
       SPEEDTEST_ARGS: "--source 192.168.10.163"
       SPEEDTEST_SERVER: 26853
@@ -57,6 +69,9 @@ services:
     cap_add:
       - NET_ADMIN
       - NET_RAW
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     environment:
       SPEEDTEST_ARGS: "--source 192.168.10.164"
       SPEEDTEST_SERVER: 26853
@@ -69,6 +84,9 @@ services:
     cap_add:
       - NET_ADMIN
       - NET_RAW
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     environment:
       SPEEDTEST_ARGS: "--source 192.168.10.165"
       SPEEDTEST_SERVER: 26853
@@ -81,6 +99,9 @@ services:
     cap_add:
       - NET_ADMIN
       - NET_RAW
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     environment:
       SPEEDTEST_ARGS: "--source 192.168.10.166"
       SPEEDTEST_SERVER: 26853
@@ -93,6 +114,9 @@ services:
     cap_add:
       - NET_ADMIN
       - NET_RAW
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     environment:
       SPEEDTEST_ARGS: "--source 192.168.10.167"
       SPEEDTEST_SERVER: 26853
