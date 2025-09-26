@@ -14,6 +14,7 @@ SLACK_WEBHOOK_URL = os.getenv("SLACK_WEBHOOK_URL", "")
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://192.168.10.32:11434")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "gpt-oss:20b")
 LLM_ENABLE = os.getenv("LLM_ENABLE", "1") not in ("0", "false", "False")
+OLLAMA_TIMEOUT_SEC = int(os.getenv("OLLAMA_TIMEOUT_SEC", "300"))
 
 
 def _read_slack_webhook_from_secret() -> str:
@@ -206,24 +207,73 @@ def _load_llm_static_context() -> Dict[str, Any]:
     }
 
 
-def _ollama_chat(messages: List[Dict[str, str]], timeout: int = 60) -> Optional[str]:
+def _ollama_chat(messages: List[Dict[str, str]], timeout: Optional[int] = None) -> Optional[str]:
     try:
         resp = requests.post(
             f"{OLLAMA_URL.rstrip('/')}/api/chat",
-            json={"model": OLLAMA_MODEL, "messages": messages, "stream": False, "options": {"temperature": 0.2}},
-            timeout=timeout,
+            json={
+                "model": OLLAMA_MODEL,
+                "messages": messages,
+                "stream": False,
+                "keep_alive": "5m",
+                "options": {"temperature": 0.2, "num_ctx": 8192},
+            },
+            timeout=timeout or OLLAMA_TIMEOUT_SEC,
         )
         if not resp.ok:
-            return None
+            return f"__ERR__ HTTP {resp.status_code}: {resp.text[:200]}"
         data = resp.json()
         # new format: {message:{content: "..."}}
         msg = (data.get("message") or {}).get("content")
         if msg:
             return msg
         # fallback older generate format
-        return data.get("response")
-    except Exception:
-        return None
+        legacy = data.get("response")
+        return legacy if legacy is not None else ""
+    except Exception as exc:  # noqa: BLE001
+        return f"__ERR__ EXC {type(exc).__name__}: {str(exc)[:200]}"
+
+
+def _top_n_items(d: Dict[str, Dict[str, Any]], keys: List[str], n: int, reverse: bool = True) -> Dict[str, Dict[str, Any]]:
+    if not d:
+        return {}
+    def score(v: Dict[str, Any]) -> float:
+        vals = []
+        for k in keys:
+            x = v.get(k, 0.0)
+            try:
+                vals.append(float(x))
+            except Exception:
+                vals.append(0.0)
+        return sum(vals)
+    items = sorted(((k, v) for k, v in d.items() if v), key=lambda kv: score(kv[1]), reverse=reverse)
+    return {k: v for k, v in items[:n]}
+
+
+def _reduce_for_llm(payload: Dict[str, Any], top_n: int = 3) -> Dict[str, Any]:
+    th = payload.get("thresholds", {})
+    cpu = payload.get("cpu_by_gw", {})
+    ram = payload.get("ram_by_gw", {})
+    ping = payload.get("ping_by_gw", {})
+    spd = payload.get("speedtest_by_line", {})
+    err = payload.get("errors_by_gw", {})
+    reduced = {
+        "window": payload.get("window", {}),
+        "thresholds": th,
+        "cpu_by_gw_top": _top_n_items(cpu, ["time_over_critical_min", "p95", "cv"], top_n, True),
+        "ram_by_gw_top": _top_n_items(ram, ["time_over_critical_min", "p95", "cv"], top_n, True),
+        "ping_by_gw_top": _top_n_items(ping, ["time_over_critical_min", "p95"], top_n, True),
+        "speedtest_lines_top": _top_n_items(
+            {k: {**v, "under_sum": (v.get("time_dl_under_warn_min", 0.0) + v.get("time_ul_under_warn_min", 0.0))} for k, v in spd.items()},
+            ["under_sum"],
+            top_n,
+            True,
+        ),
+        "errors_total": int(sum((float(v) for v in err.values()), 0.0)),
+        "errors_top": dict(sorted(err.items(), key=lambda kv: kv[1], reverse=True)[:top_n]),
+        "static": payload.get("static", {}),
+    }
+    return reduced
 
 
 def collect_llm_assessment() -> List[str]:
@@ -390,9 +440,11 @@ def collect_llm_assessment() -> List[str]:
         "ưu tiên tính ổn định theo thời gian (time-over-threshold, burstiness, slope, anomaly) thay vì chỉ lấy trung bình. "
         "Trả lời tiếng Việt, súc tích. Phân loại mức độ: Tốt / Cảnh báo / Sự cố."
     )
+    reduced_payload = _reduce_for_llm(payload, top_n=3)
+
     user_prompt = (
         "Context tĩnh (ngưỡng/giờ làm việc/ghi chú):\n" + json.dumps({k: v for k, v in static_ctx.items()}, ensure_ascii=False) +
-        "\n\nFeature 24h đã xử lý (JSON):\n" + json.dumps(payload, ensure_ascii=False) +
+        "\n\nFeature 24h đã xử lý (top-N):\n" + json.dumps(reduced_payload, ensure_ascii=False) +
         "\n\nYêu cầu: \n"
         "1) Tình trạng tổng quát.\n"
         "2) 3-6 gạch đầu dòng nêu lý do chính (nêu gw/line, chỉ số, thời điểm).\n"
