@@ -184,7 +184,10 @@ def _load_llm_static_context() -> Dict[str, Any]:
         cfg_path = os.path.join(base_dir, "..", "configs", "llm_static.json")
         if os.path.isfile(cfg_path):
             with open(cfg_path, "r", encoding="utf-8") as fh:
-                return json.load(fh)
+                obj = json.load(fh)
+                if isinstance(obj, dict):
+                    return obj
+                # If file content is not a JSON object, ignore and use defaults
     except Exception:
         pass
     # Defaults
@@ -357,7 +360,15 @@ def collect_llm_assessment() -> List[str]:
     expr_err = "sum by (gw) (increase(ifInErrors[24h]) + increase(ifOutErrors[24h]))"
     err = {r["metric"].get("gw", ""): float(r["value"][1]) for r in prom_query(expr_err)}
 
-    step_seconds_any = _estimate_step_seconds(next(iter([_safe_float_series(s)[0] for s in (cpu_series[:1] or [{}])]), []))
+    # Ước lượng step_seconds an toàn kể cả khi không có series CPU
+    try:
+        if cpu_series:
+            ts_any, _vs_any = _safe_float_series([cpu_series[0]])
+        else:
+            ts_any = []
+        step_seconds_any = _estimate_step_seconds(ts_any)
+    except Exception:
+        step_seconds_any = 300.0
 
     payload = {
         "window": {
@@ -596,10 +607,11 @@ def build_report() -> str:
     try:
         parts.extend(collect_llm_assessment())
     except Exception as _exc:  # noqa: BLE001
-        # Always show a visible section even if failed
+        # Always show a visible section even if failed, with detailed error
+        err_type = type(_exc).__name__
         parts.extend([
             "*LLM Đánh giá tình trạng (24h)*",
-            f"- Lỗi khi tạo đánh giá LLM: {_exc}",
+            f"- Lỗi khi tạo đánh giá LLM: {err_type}: {repr(_exc)}",
         ])
     parts.extend(collect_cpu_ram_24h_by_gw())
     parts.extend(collect_speedtest_by_line())
@@ -633,10 +645,11 @@ def build_report_blocks() -> List[Dict]:
     try:
         add_section_from_lines(collect_llm_assessment())
     except Exception as _exc:  # noqa: BLE001
-        # Add error section instead of hiding
+        # Add error section instead of hiding, with details
+        err_type = type(_exc).__name__
         add_section_from_lines([
             "*LLM Đánh giá tình trạng (24h)*",
-            f"- Lỗi khi tạo đánh giá LLM: {_exc}",
+            f"- Lỗi khi tạo đánh giá LLM: {err_type}: {repr(_exc)}",
         ])
 
     # CPU & RAM
