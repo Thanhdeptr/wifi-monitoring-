@@ -366,6 +366,8 @@ def _reduce_for_llm(payload: Dict[str, Any], top_n: int = 3) -> Dict[str, Any]:
     ping = payload.get("ping_by_gw", {})
     spd = payload.get("speedtest_by_line", {})
     err = payload.get("errors_by_gw", {})
+    hist7 = payload.get("history_7d", {})
+    cmp7 = payload.get("compare_7d", {})
     reduced = {
         "window": payload.get("window", {}),
         "thresholds": th,
@@ -381,6 +383,8 @@ def _reduce_for_llm(payload: Dict[str, Any], top_n: int = 3) -> Dict[str, Any]:
         "errors_total": int(sum((float(v) for v in err.values()), 0.0)),
         "errors_top": dict(sorted(err.items(), key=lambda kv: kv[1], reverse=True)[:top_n]),
         "static": payload.get("static", {}),
+        "history_7d": hist7,
+        "compare_7d": cmp7,
     }
     return reduced
 
@@ -584,13 +588,14 @@ def collect_llm_assessment() -> List[str]:
 
     user_prompt = (
         "Context tĩnh (ngưỡng/giờ làm việc/ghi chú):\n" + json.dumps({k: v for k, v in static_ctx.items()}, ensure_ascii=False) +
-        "\n\nFeature 24h đã xử lý (top-N):\n" + json.dumps(reduced_payload, ensure_ascii=False) +
+        "\n\nFeature 24h đã xử lý (top-N) + Lịch sử 7 ngày và so sánh hôm nay vs 7 ngày:\n" + json.dumps(reduced_payload, ensure_ascii=False) +
         "\n\nYêu cầu: \n"
         "1) Tình trạng tổng quát.\n"
         "2) 3-6 gạch đầu dòng nêu lý do chính (nêu gw/line, chỉ số, thời điểm).\n"
         "3) Hành động khuyến nghị ngắn gọn.\n"
-        "4) Điểm bất thường cần theo dõi.\n"
-        "5) Một câu kết luận (<= 120 ký tự)."
+        "4) So sánh 7 ngày: nêu tăng/giảm hôm nay so với median/p95 của 6 ngày trước (CPU/ram/ping/errors).\n"
+        "5) Điểm bất thường cần theo dõi.\n"
+        "6) Một câu kết luận (<= 120 ký tự)."
     )
 
     llm_text = _ollama_chat([
