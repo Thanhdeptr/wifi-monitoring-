@@ -12,7 +12,7 @@ SLACK_WEBHOOK_URL = os.getenv("SLACK_WEBHOOK_URL", "")
 
 # LLM/Ollama configuration
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://192.168.10.32:11434")
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "gpt-oss:20b")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama2:13b")
 LLM_ENABLE = os.getenv("LLM_ENABLE", "1") not in ("0", "false", "False")
 OLLAMA_TIMEOUT_SEC = int(os.getenv("OLLAMA_TIMEOUT_SEC", "300"))
 
