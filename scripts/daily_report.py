@@ -67,6 +67,25 @@ def prom_query_range(expr: str, start: dt.datetime, end: dt.datetime, step: str 
     return data["data"]["result"]
 
 
+def prom_query_range_seconds(expr: str, start_epoch: int, end_epoch: int, step_seconds: int = 300) -> List[Dict]:
+    resp = requests.get(
+        f"{PROMETHEUS_URL}/api/v1/query_range",
+        params={
+            "query": expr,
+            "start": start_epoch,
+            "end": end_epoch,
+            "step": f"{step_seconds}s",
+        },
+        timeout=90,
+    )
+    if not resp.ok:
+        raise RuntimeError(f"Prometheus range error for {expr}: {resp.status_code} {resp.text}")
+    data = resp.json()
+    if data.get("status") != "success":
+        raise RuntimeError(f"Prometheus range error for {expr}: {data}")
+    return data["data"]["result"]
+
+
 # ------------------------------
 # Utilities for feature engineering
 # ------------------------------
@@ -205,6 +224,96 @@ def _load_llm_static_context() -> Dict[str, Any]:
         },
         "notes": "Có thể override qua configs/llm_static.json"
     }
+
+
+def _daily_bins_utc(days: int = 7) -> List[Tuple[int, int, str]]:
+    """Return list of (start_epoch, end_epoch, label_date) for each day in UTC, recent first including today."""
+    end = dt.datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0) + dt.timedelta(days=1)
+    bins: List[Tuple[int, int, str]] = []
+    for i in range(days):
+        day_end = end - dt.timedelta(days=i)
+        day_start = day_end - dt.timedelta(days=1)
+        bins.append((int(day_start.timestamp()), int(day_end.timestamp()), day_start.strftime("%Y-%m-%d")))
+    return list(reversed(bins))
+
+
+def _series_values(series: List[Dict]) -> List[float]:
+    if not series:
+        return []
+    values = [(float(ts), float(v)) for ts, v in series[0].get("values", []) if v not in ("NaN", "Inf", "+Inf", "-Inf")]
+    return [v for _, v in values]
+
+
+def _agg_nums(nums: List[float]) -> Dict[str, float]:
+    if not nums:
+        return {"avg": 0.0, "p95": 0.0, "max": 0.0, "cv": 0.0}
+    avg = sum(nums) / len(nums)
+    return {
+        "avg": avg,
+        "p95": _percentile(nums, 95),
+        "max": max(nums),
+        "cv": _coef_var(nums),
+    }
+
+
+def collect_7d_summary() -> Tuple[List[str], Dict[str, Any]]:
+    """Return human lines and a compact dict for last 7 days comparisons."""
+    bins = _daily_bins_utc(7)
+    lines: List[str] = ["*7d So sánh xu hướng*"]
+    summary: Dict[str, Any] = {"days": []}
+
+    for start_epoch, end_epoch, label in bins:
+        # CPU and RAM by gw aggregated to overall (take worst p95 across gw per day)
+        cpu_series = prom_query_range_seconds("avg by (gw) (hrProcessorLoad)", start_epoch, end_epoch, 300)
+        ram_expr = (
+            '100 * avg by (gw) (hrStorageUsed{hrStorageIndex="1"} / hrStorageSize{hrStorageIndex="1"})'
+        )
+        ram_series = prom_query_range_seconds(ram_expr, start_epoch, end_epoch, 300)
+
+        cpu_p95s = []
+        for s in cpu_series:
+            nums = _series_values([s])
+            if nums:
+                cpu_p95s.append(_percentile(nums, 95))
+        ram_p95s = []
+        for s in ram_series:
+            nums = _series_values([s])
+            if nums:
+                ram_p95s.append(_percentile(nums, 95))
+
+        cpu_p95_worst = max(cpu_p95s) if cpu_p95s else 0.0
+        ram_p95_worst = max(ram_p95s) if ram_p95s else 0.0
+
+        # Ping overall (max p95 among gateways)
+        ping_p95s: List[float] = []
+        for gw in ["GW1", "GW2", "GW4", "GW5"]:
+            ping_series = prom_query_range_seconds(f"speedtest_ping_latency_milliseconds{{gateway=\"{gw}\"}}", start_epoch, end_epoch, 300)
+            nums = _series_values(ping_series)
+            if nums:
+                ping_p95s.append(_percentile(nums, 95))
+        ping_p95_worst = max(ping_p95s) if ping_p95s else 0.0
+
+        # Errors per day total
+        err_expr = "sum by (gw) (increase(ifInErrors[24h]) + increase(ifOutErrors[24h]))"
+        # Approx by querying at day end instant
+        try:
+            err_total = int(sum(float(r["value"][1]) for r in prom_query(f"sum by (gw) (increase(ifInErrors[{(end_epoch-start_epoch)//3600}h]))")))
+        except Exception:
+            err_total = 0
+
+        summary_day = {
+            "date": label,
+            "cpu_p95_worst": cpu_p95_worst,
+            "ram_p95_worst": ram_p95_worst,
+            "ping_p95_worst": ping_p95_worst,
+            "errors_total": err_total,
+        }
+        summary["days"].append(summary_day)
+        lines.append(
+            f"- {label}: CPU p95 worst {cpu_p95_worst:.1f}% | RAM p95 worst {ram_p95_worst:.1f}% | Ping p95 worst {ping_p95_worst:.1f} ms | Errors {err_total}"
+        )
+
+    return lines, summary
 
 
 def _ollama_chat(messages: List[Dict[str, str]], timeout: Optional[int] = None) -> Optional[str]:
@@ -434,6 +543,13 @@ def collect_llm_assessment() -> List[str]:
         "errors_by_gw": err,
         "static": {k: v for k, v in static_ctx.items() if k != "thresholds"},
     }
+
+    # Add 7d history summary to payload (compact)
+    try:
+        _lines7d, summary7d = collect_7d_summary()
+        payload["history_7d"] = summary7d
+    except Exception:
+        payload["history_7d"] = {"days": []}
 
     system_prompt = (
         "Bạn là kỹ sư vận hành mạng. Hãy đánh giá sức khỏe hạ tầng trong 24h qua dựa trên các feature thống kê, "
@@ -666,6 +782,12 @@ def build_report() -> str:
             f"- Lỗi khi tạo đánh giá LLM: {err_type}: {repr(_exc)}",
         ])
     parts.extend(collect_cpu_ram_24h_by_gw())
+    # 7d comparison section
+    try:
+        lines7d, _summary7d = collect_7d_summary()
+        parts.extend(lines7d)
+    except Exception:
+        pass
     parts.extend(collect_speedtest_by_line())
     parts.extend(collect_errors_by_gw())
     return "\n".join(parts)
@@ -707,6 +829,14 @@ def build_report_blocks() -> List[Dict]:
     # CPU & RAM
     blocks.append({"type": "divider"})
     add_section_from_lines(collect_cpu_ram_24h_by_gw())
+
+    # 7d Comparison
+    blocks.append({"type": "divider"})
+    try:
+        l7d, _ = collect_7d_summary()
+        add_section_from_lines(l7d)
+    except Exception:
+        pass
 
     # Speedtest by Line
     blocks.append({"type": "divider"})
