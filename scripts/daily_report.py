@@ -2,13 +2,18 @@ import os
 import sys
 import json
 import datetime as dt
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple, Optional, Any
 
 import requests
 
 
 PROMETHEUS_URL = os.getenv("PROMETHEUS_URL", "http://192.168.10.18:9090")
 SLACK_WEBHOOK_URL = os.getenv("SLACK_WEBHOOK_URL", "")
+
+# LLM/Ollama configuration
+OLLAMA_URL = os.getenv("OLLAMA_URL", "http://192.168.10.32:11434")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "gpt-oss:20b")
+LLM_ENABLE = os.getenv("LLM_ENABLE", "1") not in ("0", "false", "False")
 
 
 def _read_slack_webhook_from_secret() -> str:
@@ -59,6 +64,351 @@ def prom_query_range(expr: str, start: dt.datetime, end: dt.datetime, step: str 
     if data.get("status") != "success":
         raise RuntimeError(f"Prometheus range error for {expr}: {data}")
     return data["data"]["result"]
+
+
+# ------------------------------
+# Utilities for feature engineering
+# ------------------------------
+
+def _percentile(nums: List[float], p: float) -> float:
+    if not nums:
+        return 0.0
+    if p <= 0:
+        return min(nums)
+    if p >= 100:
+        return max(nums)
+    arr = sorted(nums)
+    n = len(arr)
+    pos = (n - 1) * (p / 100.0)
+    lo = int(pos)
+    hi = min(lo + 1, n - 1)
+    frac = pos - lo
+    return arr[lo] * (1 - frac) + arr[hi] * frac
+
+
+def _median(nums: List[float]) -> float:
+    if not nums:
+        return 0.0
+    return _percentile(nums, 50)
+
+
+def _mad(nums: List[float]) -> float:
+    if not nums:
+        return 0.0
+    med = _median(nums)
+    abs_dev = [abs(x - med) for x in nums]
+    return _median(abs_dev)
+
+
+def _coef_var(nums: List[float]) -> float:
+    if not nums:
+        return 0.0
+    mean = sum(nums) / len(nums)
+    if mean == 0:
+        return 0.0
+    # population std
+    var = sum((x - mean) ** 2 for x in nums) / len(nums)
+    return (var ** 0.5) / mean
+
+
+def _slope_per_hour(timestamps: List[float], values: List[float]) -> float:
+    # Simple linear regression slope normalized per hour
+    if len(values) < 2:
+        return 0.0
+    # Use indices if timestamps are not strictly increasing
+    if not timestamps or len(timestamps) != len(values):
+        x = list(range(len(values)))
+        # assume 5m step
+        seconds_per_step = 300.0
+    else:
+        x = timestamps
+        # estimate typical step
+        diffs = [t2 - t1 for t1, t2 in zip(timestamps[:-1], timestamps[1:]) if t2 > t1]
+        seconds_per_step = (sum(diffs) / len(diffs)) if diffs else 300.0
+    n = len(values)
+    mean_x = sum(x) / n
+    mean_y = sum(values) / n
+    cov = sum((xi - mean_x) * (yi - mean_y) for xi, yi in zip(x, values))
+    varx = sum((xi - mean_x) ** 2 for xi in x)
+    if varx == 0:
+        return 0.0
+    slope_per_second = cov / varx
+    return slope_per_second * 3600.0
+
+
+def _time_over_threshold_minutes(values: List[float], thresholds: Tuple[float, float], step_seconds: float) -> Tuple[float, float, int]:
+    warn, crit = thresholds
+    over_warn = sum(1 for v in values if v >= warn)
+    over_crit = sum(1 for v in values if v >= crit)
+    spikes = over_crit
+    minutes_per_step = step_seconds / 60.0
+    return over_warn * minutes_per_step, over_crit * minutes_per_step, spikes
+
+
+def _anomaly_rate(nums: List[float]) -> float:
+    if not nums:
+        return 0.0
+    med = _median(nums)
+    mad = _mad(nums)
+    if mad == 0:
+        return 0.0
+    upper = med + 3 * mad
+    lower = med - 3 * mad
+    anomalies = sum(1 for x in nums if x > upper or x < lower)
+    return anomalies / len(nums)
+
+
+def _safe_float_series(series: List[Dict]) -> Tuple[List[float], List[float]]:
+    # Returns timestamps (epoch seconds) and numeric values
+    if not series:
+        return [], []
+    values = [(float(ts), float(v)) for ts, v in series[0]["values"] if v not in ("NaN", "Inf", "+Inf", "-Inf")]
+    if not values:
+        return [], []
+    ts = [t for t, _ in values]
+    vs = [v for _, v in values]
+    return ts, vs
+
+
+def _estimate_step_seconds(timestamps: List[float]) -> float:
+    if len(timestamps) < 2:
+        return 300.0
+    diffs = [t2 - t1 for t1, t2 in zip(timestamps[:-1], timestamps[1:]) if t2 > t1]
+    return (sum(diffs) / len(diffs)) if diffs else 300.0
+
+
+def _load_llm_static_context() -> Dict[str, Any]:
+    # Try load configs/llm_static.json; fall back to defaults
+    try:
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        cfg_path = os.path.join(base_dir, "..", "configs", "llm_static.json")
+        if os.path.isfile(cfg_path):
+            with open(cfg_path, "r", encoding="utf-8") as fh:
+                return json.load(fh)
+    except Exception:
+        pass
+    # Defaults
+    return {
+        "business_hours": "08:00-18:00 Asia/Ho_Chi_Minh",
+        "severity": {"ok": 0, "warning": 1, "critical": 2},
+        "thresholds": {
+            "cpu_percent": {"warning": 70.0, "critical": 85.0},
+            "ram_percent": {"warning": 75.0, "critical": 90.0},
+            "ping_ms": {"warning": 60.0, "critical": 120.0},
+            # If WAN capacities unknown, evaluate relatively
+            "wan_download_bps": {"warning": 20_000_000.0, "critical": 10_000_000.0},
+            "wan_upload_bps": {"warning": 10_000_000.0, "critical": 5_000_000.0},
+        },
+        "notes": "Có thể override qua configs/llm_static.json"
+    }
+
+
+def _ollama_chat(messages: List[Dict[str, str]], timeout: int = 60) -> Optional[str]:
+    try:
+        resp = requests.post(
+            f"{OLLAMA_URL.rstrip('/')}/api/chat",
+            json={"model": OLLAMA_MODEL, "messages": messages, "stream": False, "options": {"temperature": 0.2}},
+            timeout=timeout,
+        )
+        if not resp.ok:
+            return None
+        data = resp.json()
+        # new format: {message:{content: "..."}}
+        msg = (data.get("message") or {}).get("content")
+        if msg:
+            return msg
+        # fallback older generate format
+        return data.get("response")
+    except Exception:
+        return None
+
+
+def collect_llm_assessment() -> List[str]:
+    """Compute robust features and ask LLM for a daily health assessment."""
+    if not LLM_ENABLE:
+        return []
+
+    end = dt.datetime.utcnow()
+    start = end - dt.timedelta(hours=24)
+
+    static_ctx = _load_llm_static_context()
+    th = static_ctx.get("thresholds", {})
+
+    # CPU by gw
+    cpu_series = prom_query_range("avg by (gw) (hrProcessorLoad)", start, end, step="5m")
+    # RAM by gw
+    mem_expr_idx1 = '100 * avg by (gw) (hrStorageUsed{hrStorageIndex="1"} / hrStorageSize{hrStorageIndex="1"})'
+    mem_series = prom_query_range(mem_expr_idx1, start, end, step="5m")
+    if not mem_series:
+        mem_expr_descr = (
+            '100 * avg by (gw) (hrStorageUsed{hrStorageType="1.3.6.1.2.1.25.2.1.2"} / hrStorageSize{hrStorageType="1.3.6.1.2.1.25.2.1.2"})'
+        )
+        mem_series = prom_query_range(mem_expr_descr, start, end, step="5m")
+
+    # Ping by gateway
+    gateways = ["GW1", "GW2", "GW4", "GW5"]
+
+    # Speedtest by line
+    wan_lines = [f"WAN{i}" for i in range(1, 8 + 1)]
+
+    def map_by_label(series: List[Dict], label: str) -> Dict[str, Dict[str, Any]]:
+        out: Dict[str, Dict[str, Any]] = {}
+        for s in series:
+            key = s.get("metric", {}).get(label, "")
+            ts, vs = _safe_float_series([s])
+            if not vs:
+                out[key] = {}
+                continue
+            step_seconds = _estimate_step_seconds(ts)
+            warn = th.get("cpu_percent", {}).get("warning", 70.0) if label == "gw" else 0.0
+            crit = th.get("cpu_percent", {}).get("critical", 85.0) if label == "gw" else 0.0
+            if "hrStorage" in json.dumps(s.get("metric", {})):
+                warn = th.get("ram_percent", {}).get("warning", 75.0)
+                crit = th.get("ram_percent", {}).get("critical", 90.0)
+            owarn_m, ocrit_m, spikes = _time_over_threshold_minutes(vs, (warn, crit), step_seconds)
+            out[key] = {
+                "avg": (sum(vs) / len(vs)),
+                "p95": _percentile(vs, 95),
+                "max": max(vs),
+                "cv": _coef_var(vs),
+                "slope_per_hour": _slope_per_hour(ts, vs),
+                "anomaly_rate": _anomaly_rate(vs),
+                "time_over_warning_min": owarn_m,
+                "time_over_critical_min": ocrit_m,
+                "spikes": spikes,
+                "peak_time": dt.datetime.utcfromtimestamp(ts[vs.index(max(vs))]).strftime("%H:%M") if ts else "-",
+            }
+        return out
+
+    cpu_by_gw = map_by_label(cpu_series, "gw")
+    # For RAM, rebuild series by gw key since we lose context inside helper
+    ram_by_gw: Dict[str, Dict[str, Any]] = {}
+    for s in mem_series:
+        key = s.get("metric", {}).get("gw", "")
+        ts, vs = _safe_float_series([s])
+        if not vs:
+            ram_by_gw[key] = {}
+            continue
+        step_seconds = _estimate_step_seconds(ts)
+        warn = th.get("ram_percent", {}).get("warning", 75.0)
+        crit = th.get("ram_percent", {}).get("critical", 90.0)
+        owarn_m, ocrit_m, spikes = _time_over_threshold_minutes(vs, (warn, crit), step_seconds)
+        ram_by_gw[key] = {
+            "avg": (sum(vs) / len(vs)),
+            "p95": _percentile(vs, 95),
+            "max": max(vs),
+            "cv": _coef_var(vs),
+            "slope_per_hour": _slope_per_hour(ts, vs),
+            "anomaly_rate": _anomaly_rate(vs),
+            "time_over_warning_min": owarn_m,
+            "time_over_critical_min": ocrit_m,
+            "spikes": spikes,
+            "peak_time": dt.datetime.utcfromtimestamp(ts[vs.index(max(vs))]).strftime("%H:%M") if ts else "-",
+        }
+
+    ping_by_gw: Dict[str, Dict[str, Any]] = {}
+    for gw in gateways:
+        series = prom_query_range(f"speedtest_ping_latency_milliseconds{{gateway=\"{gw}\"}}", start, end, step="5m")
+        ts, vs = _safe_float_series(series)
+        if not vs:
+            ping_by_gw[gw] = {}
+            continue
+        step_seconds = _estimate_step_seconds(ts)
+        warn = th.get("ping_ms", {}).get("warning", 60.0)
+        crit = th.get("ping_ms", {}).get("critical", 120.0)
+        owarn_m, ocrit_m, spikes = _time_over_threshold_minutes(vs, (warn, crit), step_seconds)
+        ping_by_gw[gw] = {
+            "avg": (sum(vs) / len(vs)),
+            "p95": _percentile(vs, 95),
+            "max": max(vs),
+            "time_over_warning_min": owarn_m,
+            "time_over_critical_min": ocrit_m,
+            "spikes": spikes,
+            "peak_time": dt.datetime.utcfromtimestamp(ts[vs.index(max(vs))]).strftime("%H:%M") if ts else "-",
+        }
+
+    speedtest_by_line: Dict[str, Dict[str, Any]] = {}
+    for line in wan_lines:
+        dl_series = prom_query_range(f"speedtest_download_bits_per_second{{line=\"{line}\"}}", start, end, step="5m")
+        ul_series = prom_query_range(f"speedtest_upload_bits_per_second{{line=\"{line}\"}}", start, end, step="5m")
+        ts_dl, vs_dl = _safe_float_series(dl_series)
+        ts_ul, vs_ul = _safe_float_series(ul_series)
+        warn_dl = th.get("wan_download_bps", {}).get("warning", 20_000_000.0)
+        crit_dl = th.get("wan_download_bps", {}).get("critical", 10_000_000.0)
+        warn_ul = th.get("wan_upload_bps", {}).get("warning", 10_000_000.0)
+        crit_ul = th.get("wan_upload_bps", {}).get("critical", 5_000_000.0)
+        step_seconds = _estimate_step_seconds(ts_dl or ts_ul)
+        owarn_dl_m, ocrit_dl_m, _ = _time_over_threshold_minutes(vs_dl, (warn_dl, crit_dl), step_seconds) if vs_dl else (0.0, 0.0, 0)
+        # For bandwidth, "under-performance" is low values, so also compute time below warning
+        under_warn_dl_m = sum(1 for v in vs_dl if v <= warn_dl) * (step_seconds / 60.0) if vs_dl else 0.0
+        under_warn_ul_m = sum(1 for v in vs_ul if v <= warn_ul) * (step_seconds / 60.0) if vs_ul else 0.0
+        speedtest_by_line[line] = {
+            "dl_avg": (sum(vs_dl) / len(vs_dl)) if vs_dl else 0.0,
+            "dl_p10": _percentile(vs_dl, 10) if vs_dl else 0.0,
+            "dl_min": min(vs_dl) if vs_dl else 0.0,
+            "ul_avg": (sum(vs_ul) / len(vs_ul)) if vs_ul else 0.0,
+            "ul_p10": _percentile(vs_ul, 10) if vs_ul else 0.0,
+            "ul_min": min(vs_ul) if vs_ul else 0.0,
+            "time_dl_under_warn_min": under_warn_dl_m,
+            "time_ul_under_warn_min": under_warn_ul_m,
+        }
+
+    # Interface errors (24h increase)
+    expr_err = "sum by (gw) (increase(ifInErrors[24h]) + increase(ifOutErrors[24h]))"
+    err = {r["metric"].get("gw", ""): float(r["value"][1]) for r in prom_query(expr_err)}
+
+    step_seconds_any = _estimate_step_seconds(next(iter([_safe_float_series(s)[0] for s in (cpu_series[:1] or [{}])]), []))
+
+    payload = {
+        "window": {
+            "start_utc": start.strftime("%Y-%m-%dT%H:%MZ"),
+            "end_utc": end.strftime("%Y-%m-%dT%H:%MZ"),
+            "step_seconds": step_seconds_any or 300.0,
+        },
+        "thresholds": th,
+        "cpu_by_gw": cpu_by_gw,
+        "ram_by_gw": ram_by_gw,
+        "ping_by_gw": ping_by_gw,
+        "speedtest_by_line": speedtest_by_line,
+        "errors_by_gw": err,
+        "static": {k: v for k, v in static_ctx.items() if k != "thresholds"},
+    }
+
+    system_prompt = (
+        "Bạn là kỹ sư vận hành mạng. Hãy đánh giá sức khỏe hạ tầng trong 24h qua dựa trên các feature thống kê, "
+        "ưu tiên tính ổn định theo thời gian (time-over-threshold, burstiness, slope, anomaly) thay vì chỉ lấy trung bình. "
+        "Trả lời tiếng Việt, súc tích. Phân loại mức độ: Tốt / Cảnh báo / Sự cố."
+    )
+    user_prompt = (
+        "Context tĩnh (ngưỡng/giờ làm việc/ghi chú):\n" + json.dumps({k: v for k, v in static_ctx.items()}, ensure_ascii=False) +
+        "\n\nFeature 24h đã xử lý (JSON):\n" + json.dumps(payload, ensure_ascii=False) +
+        "\n\nYêu cầu: \n"
+        "1) Tình trạng tổng quát.\n"
+        "2) 3-6 gạch đầu dòng nêu lý do chính (nêu gw/line, chỉ số, thời điểm).\n"
+        "3) Hành động khuyến nghị ngắn gọn.\n"
+        "4) Điểm bất thường cần theo dõi.\n"
+        "5) Một câu kết luận (<= 120 ký tự)."
+    )
+
+    llm_text = _ollama_chat([
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_prompt},
+    ])
+
+    title = "*LLM Đánh giá tình trạng (24h)*"
+    if not llm_text:
+        # Fallback heuristic
+        worst_cpu = max((v.get("p95", 0.0) for v in cpu_by_gw.values() if v), default=0.0)
+        worst_ram = max((v.get("p95", 0.0) for v in ram_by_gw.values() if v), default=0.0)
+        worst_ping = max((v.get("p95", 0.0) for v in ping_by_gw.values() if v), default=0.0)
+        err_total = int(sum(err.values()))
+        summary = (
+            f"- CPU p95 tệ nhất: {worst_cpu:.1f}% | RAM p95: {worst_ram:.1f}% | Ping p95: {worst_ping:.1f} ms | Errors: {err_total}\n"
+            f"- Không gọi được LLM tại {OLLAMA_URL}. Dùng tóm tắt heuristic."
+        )
+        return [title, summary]
+
+    return [title, llm_text]
 
 
 def format_value(v: float, unit: str = "") -> str:
@@ -242,6 +592,12 @@ def build_report() -> str:
     today = dt.datetime.now().strftime("%Y-%m-%d")
     parts: List[str] = []
     parts.append(f"*Daily Network Report* — {today}")
+    # LLM assessment first (if enabled)
+    try:
+        parts.extend(collect_llm_assessment())
+    except Exception as _exc:  # noqa: BLE001
+        # Keep report running even if LLM assessment fails
+        pass
     parts.extend(collect_cpu_ram_24h_by_gw())
     parts.extend(collect_speedtest_by_line())
     parts.extend(collect_errors_by_gw())
@@ -269,6 +625,14 @@ def build_report_blocks() -> List[Dict]:
         body = "\n".join(rows)
         blocks.append({"type": "section", "text": {"type": "mrkdwn", "text": f"{title}\n{body}"}})
 
+    # LLM Assessment
+    blocks.append({"type": "divider"})
+    try:
+        add_section_from_lines(collect_llm_assessment())
+    except Exception:
+        # ignore LLM failures
+        pass
+
     # CPU & RAM
     blocks.append({"type": "divider"})
     add_section_from_lines(collect_cpu_ram_24h_by_gw())
@@ -280,6 +644,8 @@ def build_report_blocks() -> List[Dict]:
     # Interface Errors
     blocks.append({"type": "divider"})
     add_section_from_lines(collect_errors_by_gw())
+
+    return blocks
 
 
 def build_report_attachments() -> List[Dict]:
