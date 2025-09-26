@@ -596,8 +596,11 @@ def build_report() -> str:
     try:
         parts.extend(collect_llm_assessment())
     except Exception as _exc:  # noqa: BLE001
-        # Keep report running even if LLM assessment fails
-        pass
+        # Always show a visible section even if failed
+        parts.extend([
+            "*LLM Đánh giá tình trạng (24h)*",
+            f"- Lỗi khi tạo đánh giá LLM: {_exc}",
+        ])
     parts.extend(collect_cpu_ram_24h_by_gw())
     parts.extend(collect_speedtest_by_line())
     parts.extend(collect_errors_by_gw())
@@ -629,9 +632,12 @@ def build_report_blocks() -> List[Dict]:
     blocks.append({"type": "divider"})
     try:
         add_section_from_lines(collect_llm_assessment())
-    except Exception:
-        # ignore LLM failures
-        pass
+    except Exception as _exc:  # noqa: BLE001
+        # Add error section instead of hiding
+        add_section_from_lines([
+            "*LLM Đánh giá tình trạng (24h)*",
+            f"- Lỗi khi tạo đánh giá LLM: {_exc}",
+        ])
 
     # CPU & RAM
     blocks.append({"type": "divider"})
