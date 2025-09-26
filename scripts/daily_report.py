@@ -544,12 +544,36 @@ def collect_llm_assessment() -> List[str]:
         "static": {k: v for k, v in static_ctx.items() if k != "thresholds"},
     }
 
-    # Add 7d history summary to payload (compact)
+    # Add 7d history summary to payload (compact) and comparative metrics vs today
     try:
         _lines7d, summary7d = collect_7d_summary()
         payload["history_7d"] = summary7d
+        # Comparative today vs last 7 days median and p95
+        days = summary7d.get("days", [])
+        if days:
+            # today's label is last element's date if bins reversed at build time
+            today_label = days[-1]["date"]
+            hist = days[:-1] if len(days) > 1 else []
+            def agg(lst, key):
+                vals = [float(d.get(key, 0.0)) for d in lst if d.get(key) is not None]
+                return {
+                    "median": _percentile(vals, 50) if vals else 0.0,
+                    "p95": _percentile(vals, 95) if vals else 0.0,
+                    "avg": (sum(vals)/len(vals)) if vals else 0.0,
+                }
+            today = days[-1]
+            payload["compare_7d"] = {
+                "today_date": today_label,
+                "cpu_p95_worst": {"today": today.get("cpu_p95_worst", 0.0), "hist": agg(hist, "cpu_p95_worst")},
+                "ram_p95_worst": {"today": today.get("ram_p95_worst", 0.0), "hist": agg(hist, "ram_p95_worst")},
+                "ping_p95_worst": {"today": today.get("ping_p95_worst", 0.0), "hist": agg(hist, "ping_p95_worst")},
+                "errors_total": {"today": today.get("errors_total", 0), "hist": agg(hist, "errors_total")},
+            }
+        else:
+            payload["compare_7d"] = {}
     except Exception:
         payload["history_7d"] = {"days": []}
+        payload["compare_7d"] = {}
 
     system_prompt = (
         "Bạn là kỹ sư vận hành mạng. Hãy đánh giá sức khỏe hạ tầng trong 24h qua dựa trên các feature thống kê, "
@@ -782,12 +806,6 @@ def build_report() -> str:
             f"- Lỗi khi tạo đánh giá LLM: {err_type}: {repr(_exc)}",
         ])
     parts.extend(collect_cpu_ram_24h_by_gw())
-    # 7d comparison section
-    try:
-        lines7d, _summary7d = collect_7d_summary()
-        parts.extend(lines7d)
-    except Exception:
-        pass
     parts.extend(collect_speedtest_by_line())
     parts.extend(collect_errors_by_gw())
     return "\n".join(parts)
@@ -829,14 +847,6 @@ def build_report_blocks() -> List[Dict]:
     # CPU & RAM
     blocks.append({"type": "divider"})
     add_section_from_lines(collect_cpu_ram_24h_by_gw())
-
-    # 7d Comparison
-    blocks.append({"type": "divider"})
-    try:
-        l7d, _ = collect_7d_summary()
-        add_section_from_lines(l7d)
-    except Exception:
-        pass
 
     # Speedtest by Line
     blocks.append({"type": "divider"})
