@@ -18,11 +18,19 @@ scrape_configs:
           - name: label
             values: ["service=speedtest-exporter"]
     relabel_configs:
+      # Chỉ giữ các container có log_path
+      - action: keep
+        source_labels: ['__meta_docker_container_log_path']
+        regex: .+
       # Map path trực tiếp từ Docker metadata (ổn định hơn)
-      - source_labels: ['__meta_docker_container_log_path']
+      - action: replace
+        source_labels: ['__meta_docker_container_log_path']
         target_label: '__path__'
+        regex: (.*)
+        replacement: $1
       # Fallback: tự dựng đường dẫn theo container_id
-      - source_labels: ['__meta_docker_container_id']
+      - action: replace
+        source_labels: ['__meta_docker_container_id']
         target_label: '__path__'
         replacement: /var/lib/docker/containers/${1}/${1}-json.log
       - source_labels: ['__meta_docker_container_name']
