@@ -46,6 +46,21 @@ scrape_configs:
     pipeline_stages:
       - docker: {}
 
+  # Fallback: Tail trực tiếp JSON logs và chỉ giữ speedtest*
+  - job_name: docker-files
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: docker-files
+          host: ${HOSTNAME}
+          __path__: /var/lib/docker/containers/*/*-json.log
+    pipeline_stages:
+      - docker: {}
+      - match:
+          selector: '{container_name!~"speedtest[0-9]+"}'
+          action: drop
+
   # Collect system logs from /var/log
   - job_name: system
     static_configs:
