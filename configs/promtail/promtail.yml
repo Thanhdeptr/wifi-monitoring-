@@ -3,7 +3,7 @@ server:
   grpc_listen_port: 0
 
 positions:
-  filename: /tmp/positions.yaml
+  filename: /var/lib/promtail/positions.yaml
 
 clients:
   - url: http://192.168.10.18:3100/loki/api/v1/push
@@ -46,23 +46,7 @@ scrape_configs:
     pipeline_stages:
       - docker: {}
 
-  # Fallback: Tail trực tiếp JSON logs và chỉ giữ speedtest*
-  - job_name: docker-files
-    static_configs:
-      - targets:
-          - localhost
-        labels:
-          job: docker-files
-          host: ${HOSTNAME}
-          __path__: /var/lib/docker/containers/*/*-json.log
-    relabel_configs:
-      # Trích container_id từ đường dẫn file JSON
-      - action: replace
-        source_labels: ['__path__']
-        target_label: 'container_id'
-        regex: '.*/([a-f0-9]{64})/.*-json.log'
-    pipeline_stages:
-      - docker: {}
+ 
 
   # Collect system logs from /var/log
   - job_name: system
@@ -74,26 +58,6 @@ scrape_configs:
           host: ${HOSTNAME}
           __path__: /var/log/*log
 
-  # Collect auth logs
-  - job_name: auth
-    static_configs:
-      - targets:
-          - localhost
-        labels:
-          job: auth
-          host: ${HOSTNAME}
-          __path__: /var/log/auth.log
-
-  # Collect kernel logs
-  - job_name: kern
-    static_configs:
-      - targets:
-          - localhost
-        labels:
-          job: kern
-          host: ${HOSTNAME}
-          __path__: /var/log/kern.log
-
   # Collect messages
   - job_name: messages
     static_configs:
@@ -104,16 +68,7 @@ scrape_configs:
           host: ${HOSTNAME}
           __path__: /var/log/messages
 
-  # Syslog receiver (UDP port 514)
-  - job_name: syslog
-    syslog:
-      listen_address: 0.0.0.0:1514
-      listen_protocol: udp
-      idle_timeout: 60s
-      label_structured_data: yes
-      labels:
-        job: syslog-udp
-        host: ${HOSTNAME}
+
 
   # Syslog receiver (TCP port 514) 
   - job_name: syslog-tcp

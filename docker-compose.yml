@@ -80,6 +80,7 @@ services:
     network_mode: host
     volumes:
       - ./configs/promtail/promtail.yml:/etc/promtail/promtail.yml:ro
+      - promtail_positions:/var/lib/promtail
       - /var/log:/var/log:ro,z
       - /var/lib/docker/containers:/var/lib/docker/containers:ro,z
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -94,3 +95,4 @@ volumes:
   prom_data:
   grafana_data:
   alertmanager_data:
+  promtail_positions:
