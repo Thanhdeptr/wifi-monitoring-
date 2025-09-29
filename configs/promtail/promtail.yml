@@ -18,6 +18,10 @@ scrape_configs:
           - name: label
             values: ["service=speedtest-exporter"]
     relabel_configs:
+      # Map container log file path for Docker json-file driver
+      - source_labels: ['__meta_docker_container_id']
+        target_label: '__path__'
+        replacement: /var/lib/docker/containers/${1}/${1}-json.log
       - source_labels: ['__meta_docker_container_name']
         target_label: 'container_name'
       - source_labels: ['__meta_docker_container_label_instance']
@@ -26,21 +30,10 @@ scrape_configs:
         target_label: 'service'
       - source_labels: ['__meta_docker_container_id']
         target_label: 'container_id'
-        regex: '(.{12})'
-        replacement: '${1}'
       - source_labels: ['__meta_docker_container_log_stream']
         target_label: 'stream'
     pipeline_stages:
-      - json:
-          expressions:
-            output: log
-            stream: stream
-            time: time
-      - timestamp:
-          source: time
-          format: RFC3339Nano
-      - output:
-          source: output
+      - docker: {}
 
   # Collect system logs from /var/log
   - job_name: system
