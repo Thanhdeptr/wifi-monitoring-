@@ -18,7 +18,10 @@ scrape_configs:
           - name: label
             values: ["service=speedtest-exporter"]
     relabel_configs:
-      # Map container log file path for Docker json-file driver
+      # Map path trực tiếp từ Docker metadata (ổn định hơn)
+      - source_labels: ['__meta_docker_container_log_path']
+        target_label: '__path__'
+      # Fallback: tự dựng đường dẫn theo container_id
       - source_labels: ['__meta_docker_container_id']
         target_label: '__path__'
         replacement: /var/lib/docker/containers/${1}/${1}-json.log
