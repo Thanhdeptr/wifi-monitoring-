@@ -76,7 +76,7 @@ services:
 
   promtail:
     image: grafana/promtail:latest
-    container_name: promtail
+    container_name: promtail_speedtest
     network_mode: host
     volumes:
       - ./configs/promtail/promtail.yml:/etc/promtail/promtail.yml:ro

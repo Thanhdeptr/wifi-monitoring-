@@ -14,7 +14,7 @@ services:
       - 1.1.1.1
     environment:
       SPEEDTEST_ARGS: "--source 192.168.10.160 --accept-license --accept-gdpr --progress=no"
-      SPEEDTEST_SERVER: 17758
+      SPEEDTEST_SERVER: 2515
       SPEEDTEST_PORT: 9798
       LISTEN_ADDRESS: 0.0.0.0:9798
       SPEEDTEST_TIMEOUT: 90
@@ -44,7 +44,7 @@ services:
       - 1.1.1.1
     environment:
       SPEEDTEST_ARGS: "--source 192.168.10.161 --accept-license --accept-gdpr --progress=no"
-      SPEEDTEST_SERVER: 17758
+      SPEEDTEST_SERVER: 2515
       SPEEDTEST_PORT: 9799
       SPEEDTEST_TIMEOUT: 90
       SPEEDTEST_RETRY: 5
@@ -72,11 +72,20 @@ services:
       - 1.1.1.1
     environment:
       SPEEDTEST_ARGS: "--source 192.168.10.162 --accept-license --accept-gdpr --progress=no"
-      SPEEDTEST_SERVER: 17758
+      SPEEDTEST_SERVER: 2515
       SPEEDTEST_PORT: 9800
       SPEEDTEST_TIMEOUT: 90
       SPEEDTEST_RETRY: 5
       SPEEDTEST_BACKOFF: 30
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service,instance"
+    labels:
+      - "service=speedtest-exporter"
+      - "instance=speedtest3"
 
   speedtest4:
     image: ghcr.io/miguelndecarvalho/speedtest-exporter
@@ -96,6 +105,15 @@ services:
       SPEEDTEST_TIMEOUT: 90
       SPEEDTEST_RETRY: 5
       SPEEDTEST_BACKOFF: 30
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service,instance"
+    labels:
+      - "service=speedtest-exporter"
+      - "instance=speedtest4"
 
   speedtest5:
     image: ghcr.io/miguelndecarvalho/speedtest-exporter
@@ -115,6 +133,15 @@ services:
       SPEEDTEST_TIMEOUT: 90
       SPEEDTEST_RETRY: 5
       SPEEDTEST_BACKOFF: 30
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service,instance"
+    labels:
+      - "service=speedtest-exporter"
+      - "instance=speedtest5"
 
   speedtest6:
     image: ghcr.io/miguelndecarvalho/speedtest-exporter
@@ -134,6 +161,15 @@ services:
       SPEEDTEST_TIMEOUT: 90
       SPEEDTEST_RETRY: 5
       SPEEDTEST_BACKOFF: 30
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service,instance"
+    labels:
+      - "service=speedtest-exporter"
+      - "instance=speedtest6"
 
   speedtest7:
     image: ghcr.io/miguelndecarvalho/speedtest-exporter
@@ -153,6 +189,15 @@ services:
       SPEEDTEST_TIMEOUT: 90
       SPEEDTEST_RETRY: 5
       SPEEDTEST_BACKOFF: 30
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service,instance"
+    labels:
+      - "service=speedtest-exporter"
+      - "instance=speedtest7"
 
   speedtest8:
     image: ghcr.io/miguelndecarvalho/speedtest-exporter
@@ -167,9 +212,18 @@ services:
       - 1.1.1.1
     environment:
       SPEEDTEST_ARGS: "--source 192.168.10.167 --accept-license --accept-gdpr --progress=no"
-      SPEEDTEST_SERVER: 17758
+      SPEEDTEST_SERVER: 2515
       SPEEDTEST_PORT: 9805
       SPEEDTEST_TIMEOUT: 90
       SPEEDTEST_RETRY: 5
       SPEEDTEST_BACKOFF: 30
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service,instance"
+    labels:
+      - "service=speedtest-exporter"
+      - "instance=speedtest8"
 
