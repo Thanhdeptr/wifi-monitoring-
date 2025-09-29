@@ -20,6 +20,15 @@ services:
       SPEEDTEST_TIMEOUT: 90
       SPEEDTEST_RETRY: 5
       SPEEDTEST_BACKOFF: 30
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service,instance"
+    labels:
+      - "service=speedtest-exporter"
+      - "instance=speedtest1"
 
 
   speedtest2:
@@ -40,6 +49,15 @@ services:
       SPEEDTEST_TIMEOUT: 90
       SPEEDTEST_RETRY: 5
       SPEEDTEST_BACKOFF: 30
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service,instance"
+    labels:
+      - "service=speedtest-exporter"
+      - "instance=speedtest2"
 
   speedtest3:
     image: ghcr.io/miguelndecarvalho/speedtest-exporter
