@@ -4,6 +4,7 @@ services:
   speedtest1:
     image: ghcr.io/miguelndecarvalho/speedtest-exporter
     container_name: speedtest1
+    restart: unless-stopped
     network_mode: "host"
     cap_add:
       - NET_ADMIN
@@ -12,14 +13,19 @@ services:
       - 8.8.8.8
       - 1.1.1.1
     environment:
-      SPEEDTEST_ARGS: "--source 192.168.10.160"
+      SPEEDTEST_ARGS: "--source 192.168.10.160 --accept-license --accept-gdpr --progress=no"
       SPEEDTEST_SERVER: 17758
       SPEEDTEST_PORT: 9798
       LISTEN_ADDRESS: 0.0.0.0:9798
+      SPEEDTEST_TIMEOUT: 90
+      SPEEDTEST_RETRY: 5
+      SPEEDTEST_BACKOFF: 30
+
 
   speedtest2:
     image: ghcr.io/miguelndecarvalho/speedtest-exporter
     container_name: speedtest2
+    restart: unless-stopped
     network_mode: "host"
     cap_add:
       - NET_ADMIN
@@ -28,13 +34,17 @@ services:
       - 8.8.8.8
       - 1.1.1.1
     environment:
-      SPEEDTEST_ARGS: "--source 192.168.10.161"
+      SPEEDTEST_ARGS: "--source 192.168.10.161 --accept-license --accept-gdpr --progress=no"
       SPEEDTEST_SERVER: 17758
       SPEEDTEST_PORT: 9799
+      SPEEDTEST_TIMEOUT: 90
+      SPEEDTEST_RETRY: 5
+      SPEEDTEST_BACKOFF: 30
 
   speedtest3:
     image: ghcr.io/miguelndecarvalho/speedtest-exporter
     container_name: speedtest3
+    restart: unless-stopped
     network_mode: "host"
     cap_add:
       - NET_ADMIN
@@ -43,13 +53,17 @@ services:
       - 8.8.8.8
       - 1.1.1.1
     environment:
-      SPEEDTEST_ARGS: "--source 192.168.10.162"
+      SPEEDTEST_ARGS: "--source 192.168.10.162 --accept-license --accept-gdpr --progress=no"
       SPEEDTEST_SERVER: 17758
       SPEEDTEST_PORT: 9800
+      SPEEDTEST_TIMEOUT: 90
+      SPEEDTEST_RETRY: 5
+      SPEEDTEST_BACKOFF: 30
 
   speedtest4:
     image: ghcr.io/miguelndecarvalho/speedtest-exporter
     container_name: speedtest4
+    restart: unless-stopped
     network_mode: "host"
     cap_add:
       - NET_ADMIN
@@ -58,13 +72,17 @@ services:
       - 8.8.8.8
       - 1.1.1.1
     environment:
-      SPEEDTEST_ARGS: "--source 192.168.10.163"
+      SPEEDTEST_ARGS: "--source 192.168.10.163 --accept-license --accept-gdpr --progress=no"
       SPEEDTEST_SERVER: 17758
       SPEEDTEST_PORT: 9801
+      SPEEDTEST_TIMEOUT: 90
+      SPEEDTEST_RETRY: 5
+      SPEEDTEST_BACKOFF: 30
 
   speedtest5:
     image: ghcr.io/miguelndecarvalho/speedtest-exporter
     container_name: speedtest5
+    restart: unless-stopped
     network_mode: "host"
     cap_add:
       - NET_ADMIN
@@ -73,13 +91,17 @@ services:
       - 8.8.8.8
       - 1.1.1.1
     environment:
-      SPEEDTEST_ARGS: "--source 192.168.10.164"
+      SPEEDTEST_ARGS: "--source 192.168.10.164 --accept-license --accept-gdpr --progress=no"
       SPEEDTEST_SERVER: 17758
       SPEEDTEST_PORT: 9802
+      SPEEDTEST_TIMEOUT: 90
+      SPEEDTEST_RETRY: 5
+      SPEEDTEST_BACKOFF: 30
 
   speedtest6:
     image: ghcr.io/miguelndecarvalho/speedtest-exporter
     container_name: speedtest6
+    restart: unless-stopped
     network_mode: "host"
     cap_add:
       - NET_ADMIN
@@ -88,13 +110,17 @@ services:
       - 8.8.8.8
       - 1.1.1.1
     environment:
-      SPEEDTEST_ARGS: "--source 192.168.10.165"
+      SPEEDTEST_ARGS: "--source 192.168.10.165 --accept-license --accept-gdpr --progress=no"
       SPEEDTEST_SERVER: 17758
       SPEEDTEST_PORT: 9803
+      SPEEDTEST_TIMEOUT: 90
+      SPEEDTEST_RETRY: 5
+      SPEEDTEST_BACKOFF: 30
 
   speedtest7:
     image: ghcr.io/miguelndecarvalho/speedtest-exporter
     container_name: speedtest7
+    restart: unless-stopped
     network_mode: "host"
     cap_add:
       - NET_ADMIN
@@ -103,13 +129,17 @@ services:
       - 8.8.8.8
       - 1.1.1.1
     environment:
-      SPEEDTEST_ARGS: "--source 192.168.10.166"
+      SPEEDTEST_ARGS: "--source 192.168.10.166 --accept-license --accept-gdpr --progress=no"
       SPEEDTEST_SERVER: 17758
       SPEEDTEST_PORT: 9804
+      SPEEDTEST_TIMEOUT: 90
+      SPEEDTEST_RETRY: 5
+      SPEEDTEST_BACKOFF: 30
 
   speedtest8:
     image: ghcr.io/miguelndecarvalho/speedtest-exporter
     container_name: speedtest8
+    restart: unless-stopped
     network_mode: "host"
     cap_add:
       - NET_ADMIN
@@ -118,7 +148,10 @@ services:
       - 8.8.8.8
       - 1.1.1.1
     environment:
-      SPEEDTEST_ARGS: "--source 192.168.10.167"
+      SPEEDTEST_ARGS: "--source 192.168.10.167 --accept-license --accept-gdpr --progress=no"
       SPEEDTEST_SERVER: 17758
       SPEEDTEST_PORT: 9805
+      SPEEDTEST_TIMEOUT: 90
+      SPEEDTEST_RETRY: 5
+      SPEEDTEST_BACKOFF: 30
 

@@ -3,7 +3,7 @@ groups:
     rules:
       # SNMP Exporter Alerts
       - alert: HighCPUUsage
-        expr: avg by (instance, gw) (hrProcessorLoad) > 85
+        expr: avg by (instance, gw) (hrProcessorLoad) > 90
         for: 10m
         labels:
           severity: warning

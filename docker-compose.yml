@@ -48,7 +48,10 @@ services:
       - GF_USERS_ALLOW_SIGN_UP=false
     volumes:
       - grafana_data:/var/lib/grafana
+      - ./configs/grafana/provisioning:/etc/grafana/provisioning:ro
     restart: unless-stopped
+    depends_on:
+      - loki
 
   mysqld-exporter:
     image: prom/mysqld-exporter:latest
@@ -70,6 +73,21 @@ services:
     command:
       - --config.file=/etc/loki/loki.yml
     restart: unless-stopped
+
+  promtail:
+    image: grafana/promtail:latest
+    container_name: promtail
+    network_mode: host
+    volumes:
+      - ./configs/promtail/promtail.yml:/etc/promtail/promtail.yml:ro
+      - /var/log:/var/log:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    command:
+      - --config.file=/etc/promtail/promtail.yml
+    restart: unless-stopped
+    depends_on:
+      - loki
 
 volumes:
   loki_data:
