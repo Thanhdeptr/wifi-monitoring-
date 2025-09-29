@@ -55,11 +55,14 @@ scrape_configs:
           job: docker-files
           host: ${HOSTNAME}
           __path__: /var/lib/docker/containers/*/*-json.log
+    relabel_configs:
+      # Trích container_id từ đường dẫn file JSON
+      - action: replace
+        source_labels: ['__path__']
+        target_label: 'container_id'
+        regex: '.*/([a-f0-9]{64})/.*-json.log'
     pipeline_stages:
       - docker: {}
-      - match:
-          selector: '{container_name!~"speedtest[0-9]+"}'
-          action: drop
 
   # Collect system logs from /var/log
   - job_name: system
