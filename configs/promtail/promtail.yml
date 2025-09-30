@@ -49,8 +49,8 @@ scrape_configs:
       # Set host label (fix ${HOSTNAME} issue)
       - target_label: 'host'
         replacement: 'speedtest-host'
-    pipeline_stages:
-      - docker: {}
+    # pipeline_stages:
+      # - docker: {}
 
 
  
