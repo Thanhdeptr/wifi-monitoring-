@@ -43,6 +43,9 @@ scrape_configs:
         target_label: 'container_id'
       - source_labels: ['__meta_docker_container_log_stream']
         target_label: 'stream'
+      # Set job label để query được
+      - target_label: 'job'
+        replacement: 'docker-speedtest'
     pipeline_stages:
       - docker: {}
 
