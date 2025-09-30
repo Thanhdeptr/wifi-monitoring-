@@ -13,13 +13,15 @@ services:
       - 8.8.8.8
       - 1.1.1.1
     environment:
-      SPEEDTEST_ARGS: "--source 192.168.10.160 --accept-license --accept-gdpr --progress=no"
+      SPEEDTEST_ARGS: "--source 192.168.10.160 --accept-license --accept-gdpr --progress=no --server-id=17758,2515,26853"
       SPEEDTEST_SERVER: 2515
       SPEEDTEST_PORT: 9798
       LISTEN_ADDRESS: 0.0.0.0:9798
-      SPEEDTEST_TIMEOUT: 90
-      SPEEDTEST_RETRY: 5
-      SPEEDTEST_BACKOFF: 30
+      SPEEDTEST_TIMEOUT: 120
+      SPEEDTEST_RETRY: 10
+      SPEEDTEST_BACKOFF: 60
+      SPEEDTEST_CONFIG_RETRY: 5
+      SPEEDTEST_CONFIG_TIMEOUT: 30
     logging:
       driver: "json-file"
       options:
@@ -43,12 +45,14 @@ services:
       - 8.8.8.8
       - 1.1.1.1
     environment:
-      SPEEDTEST_ARGS: "--source 192.168.10.161 --accept-license --accept-gdpr --progress=no"
+      SPEEDTEST_ARGS: "--source 192.168.10.161 --accept-license --accept-gdpr --progress=no --server-id=17758,2515,26853"
       SPEEDTEST_SERVER: 2515
       SPEEDTEST_PORT: 9799
-      SPEEDTEST_TIMEOUT: 90
-      SPEEDTEST_RETRY: 5
-      SPEEDTEST_BACKOFF: 30
+      SPEEDTEST_TIMEOUT: 120
+      SPEEDTEST_RETRY: 10
+      SPEEDTEST_BACKOFF: 60
+      SPEEDTEST_CONFIG_RETRY: 5
+      SPEEDTEST_CONFIG_TIMEOUT: 30
     logging:
       driver: "json-file"
       options:
@@ -71,12 +75,14 @@ services:
       - 8.8.8.8
       - 1.1.1.1
     environment:
-      SPEEDTEST_ARGS: "--source 192.168.10.162 --accept-license --accept-gdpr --progress=no"
+      SPEEDTEST_ARGS: "--source 192.168.10.162 --accept-license --accept-gdpr --progress=no --server-id=17758,2515,26853"
       SPEEDTEST_SERVER: 2515
       SPEEDTEST_PORT: 9800
-      SPEEDTEST_TIMEOUT: 90
-      SPEEDTEST_RETRY: 5
-      SPEEDTEST_BACKOFF: 30
+      SPEEDTEST_TIMEOUT: 120
+      SPEEDTEST_RETRY: 10
+      SPEEDTEST_BACKOFF: 60
+      SPEEDTEST_CONFIG_RETRY: 5
+      SPEEDTEST_CONFIG_TIMEOUT: 30
     logging:
       driver: "json-file"
       options:
@@ -99,12 +105,14 @@ services:
       - 8.8.8.8
       - 1.1.1.1
     environment:
-      SPEEDTEST_ARGS: "--source 192.168.10.163 --accept-license --accept-gdpr --progress=no"
+      SPEEDTEST_ARGS: "--source 192.168.10.163 --accept-license --accept-gdpr --progress=no --server-id=17758,2515,26853"
       SPEEDTEST_SERVER: 17758
       SPEEDTEST_PORT: 9801
-      SPEEDTEST_TIMEOUT: 90
-      SPEEDTEST_RETRY: 5
-      SPEEDTEST_BACKOFF: 30
+      SPEEDTEST_TIMEOUT: 120
+      SPEEDTEST_RETRY: 10
+      SPEEDTEST_BACKOFF: 60
+      SPEEDTEST_CONFIG_RETRY: 5
+      SPEEDTEST_CONFIG_TIMEOUT: 30
     logging:
       driver: "json-file"
       options:
@@ -127,12 +135,14 @@ services:
       - 8.8.8.8
       - 1.1.1.1
     environment:
-      SPEEDTEST_ARGS: "--source 192.168.10.164 --accept-license --accept-gdpr --progress=no"
+      SPEEDTEST_ARGS: "--source 192.168.10.164 --accept-license --accept-gdpr --progress=no --server-id=17758,2515,26853"
       SPEEDTEST_SERVER: 17758
       SPEEDTEST_PORT: 9802
-      SPEEDTEST_TIMEOUT: 90
-      SPEEDTEST_RETRY: 5
-      SPEEDTEST_BACKOFF: 30
+      SPEEDTEST_TIMEOUT: 120
+      SPEEDTEST_RETRY: 10
+      SPEEDTEST_BACKOFF: 60
+      SPEEDTEST_CONFIG_RETRY: 5
+      SPEEDTEST_CONFIG_TIMEOUT: 30
     logging:
       driver: "json-file"
       options:
@@ -155,12 +165,14 @@ services:
       - 8.8.8.8
       - 1.1.1.1
     environment:
-      SPEEDTEST_ARGS: "--source 192.168.10.165 --accept-license --accept-gdpr --progress=no"
+      SPEEDTEST_ARGS: "--source 192.168.10.165 --accept-license --accept-gdpr --progress=no --server-id=17758,2515,26853"
       SPEEDTEST_SERVER: 17758
       SPEEDTEST_PORT: 9803
-      SPEEDTEST_TIMEOUT: 90
-      SPEEDTEST_RETRY: 5
-      SPEEDTEST_BACKOFF: 30
+      SPEEDTEST_TIMEOUT: 120
+      SPEEDTEST_RETRY: 10
+      SPEEDTEST_BACKOFF: 60
+      SPEEDTEST_CONFIG_RETRY: 5
+      SPEEDTEST_CONFIG_TIMEOUT: 30
     logging:
       driver: "json-file"
       options:
@@ -183,12 +195,14 @@ services:
       - 8.8.8.8
       - 1.1.1.1
     environment:
-      SPEEDTEST_ARGS: "--source 192.168.10.166 --accept-license --accept-gdpr --progress=no"
+      SPEEDTEST_ARGS: "--source 192.168.10.166 --accept-license --accept-gdpr --progress=no --server-id=17758,2515,26853"
       SPEEDTEST_SERVER: 17758
       SPEEDTEST_PORT: 9804
-      SPEEDTEST_TIMEOUT: 90
-      SPEEDTEST_RETRY: 5
-      SPEEDTEST_BACKOFF: 30
+      SPEEDTEST_TIMEOUT: 120
+      SPEEDTEST_RETRY: 10
+      SPEEDTEST_BACKOFF: 60
+      SPEEDTEST_CONFIG_RETRY: 5
+      SPEEDTEST_CONFIG_TIMEOUT: 30
     logging:
       driver: "json-file"
       options:
@@ -211,12 +225,14 @@ services:
       - 8.8.8.8
       - 1.1.1.1
     environment:
-      SPEEDTEST_ARGS: "--source 192.168.10.167 --accept-license --accept-gdpr --progress=no"
+      SPEEDTEST_ARGS: "--source 192.168.10.167 --accept-license --accept-gdpr --progress=no --server-id=17758,2515,26853"
       SPEEDTEST_SERVER: 2515
       SPEEDTEST_PORT: 9805
-      SPEEDTEST_TIMEOUT: 90
-      SPEEDTEST_RETRY: 5
-      SPEEDTEST_BACKOFF: 30
+      SPEEDTEST_TIMEOUT: 120
+      SPEEDTEST_RETRY: 10
+      SPEEDTEST_BACKOFF: 60
+      SPEEDTEST_CONFIG_RETRY: 5
+      SPEEDTEST_CONFIG_TIMEOUT: 30
     logging:
       driver: "json-file"
       options:
