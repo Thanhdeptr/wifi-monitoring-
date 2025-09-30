@@ -1,0 +1,252 @@
+version: "3.8"
+
+services:
+  # Japan Server Tests - 8 containers using same IP range as VN
+  speedtest9:
+    image: ghcr.io/miguelndecarvalho/speedtest-exporter
+    container_name: speedtest1-japan
+    restart: unless-stopped
+    network_mode: "host"
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    environment:
+      SPEEDTEST_ARGS: "--source 192.168.10.160 --accept-license --accept-gdpr --progress=no --server-id=12876,11147,11149"
+      SPEEDTEST_SERVER: 12876
+      SPEEDTEST_PORT: 9806
+      LISTEN_ADDRESS: 0.0.0.0:9806
+      SPEEDTEST_TIMEOUT: 120
+      SPEEDTEST_RETRY: 10
+      SPEEDTEST_BACKOFF: 60
+      SPEEDTEST_CONFIG_RETRY: 5
+      SPEEDTEST_CONFIG_TIMEOUT: 30
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service,instance"
+    labels:
+      - "service=speedtest-exporter"
+      - "instance=speedtest1"
+      - "region=japan"
+
+  speedtest10:
+    image: ghcr.io/miguelndecarvalho/speedtest-exporter
+    container_name: speedtest2-japan
+    restart: unless-stopped
+    network_mode: "host"
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    environment:
+      SPEEDTEST_ARGS: "--source 192.168.10.161 --accept-license --accept-gdpr --progress=no --server-id=12876,11147,11149"
+      SPEEDTEST_SERVER: 12876
+      SPEEDTEST_PORT: 9807
+      SPEEDTEST_TIMEOUT: 120
+      SPEEDTEST_RETRY: 10
+      SPEEDTEST_BACKOFF: 60
+      SPEEDTEST_CONFIG_RETRY: 5
+      SPEEDTEST_CONFIG_TIMEOUT: 30
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service,instance"
+    labels:
+      - "service=speedtest-exporter"
+      - "instance=speedtest2"
+      - "region=japan"
+
+  speedtest11:
+    image: ghcr.io/miguelndecarvalho/speedtest-exporter
+    container_name: speedtest3-japan
+    restart: unless-stopped
+    network_mode: "host"
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    environment:
+      SPEEDTEST_ARGS: "--source 192.168.10.162 --accept-license --accept-gdpr --progress=no --server-id=12876,11147,11149"
+      SPEEDTEST_SERVER: 12876
+      SPEEDTEST_PORT: 9808
+      SPEEDTEST_TIMEOUT: 120
+      SPEEDTEST_RETRY: 10
+      SPEEDTEST_BACKOFF: 60
+      SPEEDTEST_CONFIG_RETRY: 5
+      SPEEDTEST_CONFIG_TIMEOUT: 30
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service,instance"
+    labels:
+      - "service=speedtest-exporter"
+      - "instance=speedtest3"
+      - "region=japan"    
+
+  speedtest12:
+    image: ghcr.io/miguelndecarvalho/speedtest-exporter
+    container_name: speedtest4-japan
+    restart: unless-stopped
+    network_mode: "host"
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    environment:
+      SPEEDTEST_ARGS: "--source 192.168.10.163 --accept-license --accept-gdpr --progress=no --server-id=12876,11147,11149"
+      SPEEDTEST_SERVER: 12876
+      SPEEDTEST_PORT: 9809
+      SPEEDTEST_TIMEOUT: 120
+      SPEEDTEST_RETRY: 10
+      SPEEDTEST_BACKOFF: 60
+      SPEEDTEST_CONFIG_RETRY: 5
+      SPEEDTEST_CONFIG_TIMEOUT: 30
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service,instance"
+    labels:
+      - "service=speedtest-exporter"
+      - "instance=speedtest4"  
+      - "region=japan"
+
+  speedtest13:
+    image: ghcr.io/miguelndecarvalho/speedtest-exporter
+    container_name: speedtest5-japan
+    restart: unless-stopped
+    network_mode: "host"
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    environment:
+      SPEEDTEST_ARGS: "--source 192.168.10.164 --accept-license --accept-gdpr --progress=no --server-id=12876,11147,11149"
+      SPEEDTEST_SERVER: 12876
+      SPEEDTEST_PORT: 9810
+      SPEEDTEST_TIMEOUT: 120
+      SPEEDTEST_RETRY: 10
+      SPEEDTEST_BACKOFF: 60
+      SPEEDTEST_CONFIG_RETRY: 5
+      SPEEDTEST_CONFIG_TIMEOUT: 30
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service,instance"
+    labels:
+      - "service=speedtest-exporter"
+      - "instance=speedtest5"
+      - "region=japan"
+
+  speedtest14:
+    image: ghcr.io/miguelndecarvalho/speedtest-exporter
+    container_name: speedtest6-japan
+    restart: unless-stopped
+    network_mode: "host"
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    environment:
+      SPEEDTEST_ARGS: "--source 192.168.10.165 --accept-license --accept-gdpr --progress=no --server-id=12876,11147,11149"
+      SPEEDTEST_SERVER: 12876
+      SPEEDTEST_PORT: 9811
+      SPEEDTEST_TIMEOUT: 120
+      SPEEDTEST_RETRY: 10
+      SPEEDTEST_BACKOFF: 60
+      SPEEDTEST_CONFIG_RETRY: 5
+      SPEEDTEST_CONFIG_TIMEOUT: 30
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service,instance"
+    labels:
+      - "service=speedtest-exporter"
+      - "instance=speedtest6"
+      - "region=japan"
+
+  speedtest15:
+    image: ghcr.io/miguelndecarvalho/speedtest-exporter
+    container_name: speedtest7-japan
+    restart: unless-stopped
+    network_mode: "host"
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    environment:
+      SPEEDTEST_ARGS: "--source 192.168.10.166 --accept-license --accept-gdpr --progress=no --server-id=12876,11147,11149"
+      SPEEDTEST_SERVER: 12876
+      SPEEDTEST_PORT: 9812
+      SPEEDTEST_TIMEOUT: 120
+      SPEEDTEST_RETRY: 10
+      SPEEDTEST_BACKOFF: 60
+      SPEEDTEST_CONFIG_RETRY: 5
+      SPEEDTEST_CONFIG_TIMEOUT: 30
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service,instance"
+    labels:
+      - "service=speedtest-exporter"
+      - "instance=speedtest7"
+      - "region=japan"
+
+  speedtest16:
+    image: ghcr.io/miguelndecarvalho/speedtest-exporter
+    container_name: speedtest8-japan
+    restart: unless-stopped
+    network_mode: "host"
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    environment:
+      SPEEDTEST_ARGS: "--source 192.168.10.167 --accept-license --accept-gdpr --progress=no --server-id=12876,11147,11149"
+      SPEEDTEST_SERVER: 12876
+      SPEEDTEST_PORT: 9813
+      SPEEDTEST_TIMEOUT: 120
+      SPEEDTEST_RETRY: 10
+      SPEEDTEST_BACKOFF: 60
+      SPEEDTEST_CONFIG_RETRY: 5
+      SPEEDTEST_CONFIG_TIMEOUT: 30
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service,instance"
+    labels:
+      - "service=speedtest-exporter"
+      - "instance=speedtest8"
+      - "region=japan"
