@@ -142,6 +142,90 @@ scrape_configs:
           gateway: 'GW5'
           line: 'WAN8'
 
+  # Speedtest Japan monitoring - staggered intervals to avoid conflicts
+  - job_name: 'speedtest-japan-wan1'
+    scrape_interval: 38m
+    scrape_timeout: 8m
+    static_configs:
+      - targets: ['192.168.10.18:9806']
+        labels:
+          gateway: 'GW1'
+          line: 'WAN1'
+          region: 'japan'
+
+  - job_name: 'speedtest-japan-wan2'
+    scrape_interval: 39m
+    scrape_timeout: 8m
+    static_configs:
+      - targets: ['192.168.10.18:9807']
+        labels:
+          gateway: 'GW2'
+          gateway1: 'GW5'
+          line: 'WAN2'
+          region: 'japan'
+
+  - job_name: 'speedtest-japan-wan3'
+    scrape_interval: 40m
+    scrape_timeout: 8m
+    static_configs:
+      - targets: ['192.168.10.18:9808']
+        labels:
+          gateway: 'GW2'
+          gateway1: 'GW5'
+          line: 'WAN3'
+          region: 'japan'
+
+  - job_name: 'speedtest-japan-wan4'
+    scrape_interval: 41m
+    scrape_timeout: 8m
+    static_configs:
+      - targets: ['192.168.10.18:9809']
+        labels:
+          gateway: 'GW4'
+          line: 'WAN4'
+          region: 'japan'
+
+  - job_name: 'speedtest-japan-wan5'
+    scrape_interval: 42m
+    scrape_timeout: 8m
+    static_configs:
+      - targets: ['192.168.10.18:9810']
+        labels:
+          gateway: 'GW4'
+          line: 'WAN5'
+          region: 'japan'
+
+  - job_name: 'speedtest-japan-wan6'
+    scrape_interval: 43m
+    scrape_timeout: 8m
+    static_configs:
+      - targets: ['192.168.10.18:9811']
+        labels:
+          gateway: 'GW4'
+          gateway1: 'GW5'
+          line: 'WAN6'
+          region: 'japan'
+
+  - job_name: 'speedtest-japan-wan7'
+    scrape_interval: 44m
+    scrape_timeout: 8m
+    static_configs:
+      - targets: ['192.168.10.18:9812']
+        labels:
+          gateway: 'GW4'
+          gateway1: 'GW5'
+          line: 'WAN7'
+          region: 'japan'
+
+  - job_name: 'speedtest-japan-wan8'
+    scrape_interval: 45m
+    scrape_timeout: 8m
+    static_configs:
+      - targets: ['192.168.10.18:9813']
+        labels:
+          gateway: 'GW5'
+          line: 'WAN8'
+          region: 'japan'
 
   # Omada Controller Exporter
   - job_name: 'omada-exporter'
