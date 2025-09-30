@@ -18,7 +18,72 @@ scrape_configs:
           job: docker-speedtest
           service: speedtest-exporter
           host: speedtest-host
-          __path__: /var/lib/docker/containers/*/*-json.log
+          instance: speedtest7
+          container_name: speedtest7
+          __path__: /var/lib/docker/containers/2291e0f1295c65ae5940ac3cf5d171be6e9384dc794cd5e0de6cd324096570ea/*-json.log
+      - targets:
+          - localhost
+        labels:
+          job: docker-speedtest
+          service: speedtest-exporter
+          host: speedtest-host
+          instance: speedtest2
+          container_name: speedtest2
+          __path__: /var/lib/docker/containers/8318d2b81d07bb1e7a6f5cdeb3a55d74d5abab01444655e8601998195696b698/*-json.log
+      - targets:
+          - localhost
+        labels:
+          job: docker-speedtest
+          service: speedtest-exporter
+          host: speedtest-host
+          instance: speedtest4
+          container_name: speedtest4
+          __path__: /var/lib/docker/containers/5e17e292800aa6af4e2c3384edc40699a37507906e88fe34e6b29bd4f6ae87bd/*-json.log
+      - targets:
+          - localhost
+        labels:
+          job: docker-speedtest
+          service: speedtest-exporter
+          host: speedtest-host
+          instance: speedtest1
+          container_name: speedtest1
+          __path__: /var/lib/docker/containers/41b75b9c705315b92e85c1277831111739ac8bb242e98c048a59e043f8c7558b/*-json.log
+      - targets:
+          - localhost
+        labels:
+          job: docker-speedtest
+          service: speedtest-exporter
+          host: speedtest-host
+          instance: speedtest8
+          container_name: speedtest8
+          __path__: /var/lib/docker/containers/8ce7c7c661297f6664905d02734e65b4ab9abc94130c1b7baf8f3d94314d4b7c/*-json.log
+      - targets:
+          - localhost
+        labels:
+          job: docker-speedtest
+          service: speedtest-exporter
+          host: speedtest-host
+          instance: speedtest5
+          container_name: speedtest5
+          __path__: /var/lib/docker/containers/a2d7fc863f8e24054396076f4fc0e1f235732d5b69729fbf61c408a72f20b85a/*-json.log
+      - targets:
+          - localhost
+        labels:
+          job: docker-speedtest
+          service: speedtest-exporter
+          host: speedtest-host
+          instance: speedtest3
+          container_name: speedtest3
+          __path__: /var/lib/docker/containers/321f4d16a1b3e68372b98591b5b9f13eb7ac7e03bc3d86c227f8441eae628d0e/*-json.log
+      - targets:
+          - localhost
+        labels:
+          job: docker-speedtest
+          service: speedtest-exporter
+          host: speedtest-host
+          instance: speedtest6
+          container_name: speedtest6
+          __path__: /var/lib/docker/containers/457b81bceb32b2f52cfcc9b2457ddc93f4ce53b716e89035e7822e2161c468fa/*-json.log
 
 
  
