@@ -46,6 +46,9 @@ scrape_configs:
       # Set job label để query được
       - target_label: 'job'
         replacement: 'docker-speedtest'
+      # Set host label (fix ${HOSTNAME} issue)
+      - target_label: 'host'
+        replacement: 'speedtest-host'
     pipeline_stages:
       - docker: {}
 
