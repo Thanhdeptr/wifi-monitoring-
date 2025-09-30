@@ -9,48 +9,16 @@ clients:
   - url: http://192.168.10.18:3100/loki/api/v1/push
 
 scrape_configs:
-  # Collect Docker container logs for Speedtest Exporters
+  # Collect Docker container logs for Speedtest Exporters (Static config)
   - job_name: docker-speedtest
-    docker_sd_configs:
-      - host: unix:///var/run/docker.sock
-        refresh_interval: 5s
-        filters:
-          - name: label
-            values: ["service=speedtest-exporter"]
-    relabel_configs:
-      # Chỉ giữ các container có log_path
-      - action: keep
-        source_labels: ['__meta_docker_container_log_path']
-        regex: .+
-      # Map path trực tiếp từ Docker metadata (ổn định hơn)
-      - action: replace
-        source_labels: ['__meta_docker_container_log_path']
-        target_label: '__path__'
-        regex: (.*)
-        replacement: $1
-      # Fallback: tự dựng đường dẫn theo container_id
-      - action: replace
-        source_labels: ['__meta_docker_container_id']
-        target_label: '__path__'
-        replacement: /var/lib/docker/containers/${1}/${1}-json.log
-      - source_labels: ['__meta_docker_container_name']
-        target_label: 'container_name'
-      - source_labels: ['__meta_docker_container_label_instance']
-        target_label: 'instance'
-      - source_labels: ['__meta_docker_container_label_service']
-        target_label: 'service'
-      - source_labels: ['__meta_docker_container_id']
-        target_label: 'container_id'
-      - source_labels: ['__meta_docker_container_log_stream']
-        target_label: 'stream'
-      # Set job label để query được
-      - target_label: 'job'
-        replacement: 'docker-speedtest'
-      # Set host label (fix ${HOSTNAME} issue)
-      - target_label: 'host'
-        replacement: 'speedtest-host'
-    # pipeline_stages:
-      # - docker: {}
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: docker-speedtest
+          service: speedtest-exporter
+          host: speedtest-host
+          __path__: /var/lib/docker/containers/*/*-json.log
 
 
  
