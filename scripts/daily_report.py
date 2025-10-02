@@ -31,6 +31,8 @@ AZURE_OPENAI_API_VERSION = os.getenv(
     "2025-01-01-preview",
 )
 AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY", "")
+AZURE_OPENAI_TEMPERATURE = float(os.getenv("AZURE_OPENAI_TEMPERATURE", "0.7"))
+AZURE_OPENAI_MAX_TOKENS = int(os.getenv("AZURE_OPENAI_MAX_TOKENS", "512"))
 
 
 def _read_slack_webhook_from_secret() -> str:
@@ -362,6 +364,8 @@ def _ollama_chat(messages: List[Dict[str, str]], timeout: Optional[int] = None) 
             }
             body = {
                 "messages": messages,
+                "temperature": AZURE_OPENAI_TEMPERATURE,
+                "max_tokens": AZURE_OPENAI_MAX_TOKENS,
             }
             resp = requests.post(
                 url,
@@ -384,11 +388,21 @@ def _ollama_chat(messages: List[Dict[str, str]], timeout: Optional[int] = None) 
         if not resp.ok:
             return f"__ERR__ HTTP {resp.status_code}: {resp.text[:200]}"
         data = resp.json()
-        # new format: {message:{content: "..."}}
+        # Azure Chat Completions format
+        try:
+            choices = data.get("choices") or []
+            if choices:
+                msg_obj = choices[0].get("message") or {}
+                msg_content = msg_obj.get("content")
+                if msg_content:
+                    return msg_content
+        except Exception:
+            pass
+        # Ollama newer format: {message:{content: "..."}}
         msg = (data.get("message") or {}).get("content")
         if msg:
             return msg
-        # fallback older generate format
+        # legacy generate format
         legacy = data.get("response")
         return legacy if legacy is not None else ""
     except Exception as exc:  # noqa: BLE001
@@ -699,6 +713,14 @@ A level 3 heading. Followed by a single, concise concluding sentence (under 150 
      
     print("SLACK_WEBHOOK_URL: ", SLACK_WEBHOOK_URL)
     print("sending prompt to LLM")
+    print("AZURE_OPENAI_ENDPOINT: ", AZURE_OPENAI_ENDPOINT)
+    print("AZURE_OPENAI_DEPLOYMENT: ", AZURE_OPENAI_DEPLOYMENT)
+    print("AZURE_OPENAI_API_VERSION: ", AZURE_OPENAI_API_VERSION)
+    print("AZURE_OPENAI_API_KEY: ", AZURE_OPENAI_API_KEY)
+    print("AZURE_OPENAI_TEMPERATURE: ", AZURE_OPENAI_TEMPERATURE)
+    print("AZURE_OPENAI_MAX_TOKENS: ", AZURE_OPENAI_MAX_TOKENS)
+    print("User prompt: ", user_prompt)
+    print("System prompt: ", system_prompt)
     llm_text = _ollama_chat([
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": user_prompt},
