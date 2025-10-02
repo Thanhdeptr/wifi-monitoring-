@@ -582,9 +582,9 @@ def collect_llm_assessment() -> List[str]:
     system_prompt = (
         "Bạn là kỹ sư vận hành mạng. Hãy đánh giá sức khỏe hạ tầng trong 24h qua dựa trên các feature thống kê, "
         "ưu tiên tính ổn định theo thời gian (time-over-threshold, burstiness, slope, anomaly) thay vì chỉ lấy trung bình. "
-        "Trả lời tiếng Việt, súc tích. Phân loại mức độ: Tốt / Cảnh báo / Sự cố."
+        "Trả lời tiếng Anh, súc tích. Phân loại mức độ: Tốt / Cảnh báo / Sự cố."
     )
-    reduced_payload = _reduce_for_llm(payload, top_n=3)
+    reduced_payload = _reduce_for_llm(payload, top_n=5)
 
     user_prompt = (
         "Context tĩnh (ngưỡng/giờ làm việc/ghi chú):\n" + json.dumps({k: v for k, v in static_ctx.items()}, ensure_ascii=False) +
@@ -593,11 +593,13 @@ def collect_llm_assessment() -> List[str]:
         "1) Tình trạng tổng quát.\n"
         "2) 3-6 gạch đầu dòng nêu lý do chính (nêu gw/line, chỉ số, thời điểm).\n"
         "3) Hành động khuyến nghị ngắn gọn.\n"
-        "4) So sánh 7 ngày (định tính): mô tả khác biệt hôm nay so với 6 ngày trước (CPU/RAM/Ping/Errors) nhưng KHÔNG in số liệu 7 ngày; dùng các cụm như 'tăng nhẹ', 'cao hơn đáng kể', 'ổn định hơn', 'xấu hơn nhiều'.\n"
+        "4) So sánh 7 ngày (định tính): mô tả khác biệt hôm nay so với 6 ngày trước (CPU/RAM/Ping/Errors) nhưng KHÔNG in số liệu 7 ngày; dùng các cụm như 'tăng nhẹ', 'cao hơn đáng kể', 'ổn định hơn'.\n"
         "5) Nêu 2-4 điểm cần chú ý hoặc theo dõi (ngắn gọn).\n"
         "6) Một câu kết luận (<= 120 ký tự), KHÔNG chứa số liệu 7 ngày."
     )
+     
 
+    print(user_prompt)
     llm_text = _ollama_chat([
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": user_prompt},
