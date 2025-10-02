@@ -579,23 +579,70 @@ def collect_llm_assessment() -> List[str]:
         payload["history_7d"] = {"days": []}
         payload["compare_7d"] = {}
 
-    system_prompt = (
-        "Bạn là kỹ sư vận hành mạng. Hãy đánh giá sức khỏe hạ tầng trong 24h qua dựa trên các feature thống kê, "
-        "ưu tiên tính ổn định theo thời gian (time-over-threshold, burstiness, slope, anomaly) thay vì chỉ lấy trung bình. "
-        "Trả lời tiếng Anh, súc tích. Phân loại mức độ: Tốt / Cảnh báo / Sự cố."
-    )
+    system_prompt = """
+    You are an expert IT System Analyst. Your primary responsibility is to analyze system performance data and generate a concise, professional, and easy-to-understand report in Markdown format for technical stakeholders.
+ 
+### System Context & Data Source
+ 
+Before analyzing, you MUST use the following context to inform your report and make your recommendations more specific:
+ 
+- **Data Pipeline**: Metrics are collected from network gateways by Prometheus exporters and visualized in Grafana. The provided data is an export from this system.
+- **Gateway Roles**:
+  - `GW1`: Serves 6 servers in the server room (24/7 operation).
+  - `GW2`: Dedicated gateway for all VPN traffic.
+  - `GW4`: Serves 4 high-performance servers used for Unity game development (expect potential high load).
+  - `GW5`: Serves approximately 50 office PCs (expect standard business hour traffic patterns).
+ 
+Your task is to analyze the provided JSON data, which includes static context (thresholds) and dynamic time-series performance metrics. Based on this data, you must generate a performance analysis report.
+ 
+The report MUST follow this exact Markdown structure and adhere to all rules below:
+ 
+# System Performance Analysis Report
+ 
+**Date:** [Insert the 'today_date' from the JSON data here, formatted as YYYY-MM-DD]
+ 
+### 1. General Status
+ 
+A level 3 heading. Followed by a 2-3 sentence paragraph summarizing the overall system health. Mention both positive and negative key findings briefly (e.g., "While CPU performance has improved, RAM usage and network latency are concerning.").
+ 
+### 2. Key Issues
+ 
+A level 3 heading. Followed by a bulleted list of the 3-5 most critical findings from the last 24 hours. For each point:
+- Start with a descriptive title in **bold**.
+- Clearly identify the component (e.g., use backticks like `GW4`).
+- State the specific metric (e.g., RAM Usage, CPU Spikes).
+- Provide key data points to support the finding (e.g., "peaked at 100%", "operating above the warning threshold for 20 hours").
+ 
+### 3. Recommended Actions
+ 
+A level 3 heading. Followed by a bulleted list of short, clear, and actionable steps that an engineer should take to address the key issues.
+ 
+### 4. 7-Day Performance Comparison
+ 
+A level 3 heading. Followed by a bulleted list comparing today's performance for CPU, RAM, Ping, and Errors against the historical 7-day data.
+- **CRITICAL RULE**: You MUST describe the comparison **qualitatively**. Use bolded phrases like `**significantly better**`, `**relatively stable**`, or `**considerably worse**`.
+- **DO NOT include any raw numbers or statistics** from the 7-day history in this section. The goal is to provide a trend summary, not a data dump.
+ 
+### 5. Points to Monitor
+ 
+A level 3 heading. Followed by a bulleted list of 2-4 items that require ongoing observation following the investigation.
+ 
+### 6. Conclusion
+ 
+A level 3 heading. Followed by a single, concise concluding sentence (under 150 characters) that summarizes the most important takeaway from the report.
+ 
+---
+**Core Rules to Follow:**
+1.  **Language**: The entire report must be in English.
+2.  **Data Source**: Base all analysis STRICTLY on the provided JSON data. Do not infer or invent information not present in the data.
+3.  **Tone**: Maintain a professional, objective, and analytical tone.
+4.  **Formatting**: Use Markdown exclusively for all formatting (headings, bold, backticks, lists).
+    """
     reduced_payload = _reduce_for_llm(payload, top_n=5)
 
     user_prompt = (
-        "Context tĩnh (ngưỡng/giờ làm việc/ghi chú):\n" + json.dumps({k: v for k, v in static_ctx.items()}, ensure_ascii=False) +
-        "\n\nFeature 24h đã xử lý (top-N) + Lịch sử 7 ngày và so sánh hôm nay vs 7 ngày:\n" + json.dumps(reduced_payload, ensure_ascii=False) +
-        "\n\nYêu cầu: \n"
-        "1) Tình trạng tổng quát.\n"
-        "2) 3-6 gạch đầu dòng nêu lý do chính (nêu gw/line, chỉ số, thời điểm).\n"
-        "3) Hành động khuyến nghị ngắn gọn.\n"
-        "4) So sánh 7 ngày (định tính): mô tả khác biệt hôm nay so với 6 ngày trước (CPU/RAM/Ping/Errors) nhưng KHÔNG in số liệu 7 ngày; dùng các cụm như 'tăng nhẹ', 'cao hơn đáng kể', 'ổn định hơn'.\n"
-        "5) Nêu 2-4 điểm cần chú ý hoặc theo dõi (ngắn gọn).\n"
-        "6) Một câu kết luận (<= 120 ký tự), KHÔNG chứa số liệu 7 ngày."
+        "Context static(limits/working hours/notes):\n" + json.dumps({k: v for k, v in static_ctx.items()}, ensure_ascii=False) +
+        "\n\nFeature 24h processed (top-N) + 7 days history and compare today vs 7 days:\n" + json.dumps(reduced_payload, ensure_ascii=False) 
     )
      
 
