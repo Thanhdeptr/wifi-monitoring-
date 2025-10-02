@@ -365,7 +365,7 @@ def _ollama_chat(messages: List[Dict[str, str]], timeout: Optional[int] = None) 
             body = {
                 "messages": messages,
                 "temperature": AZURE_OPENAI_TEMPERATURE,
-                "max_tokens": AZURE_OPENAI_MAX_TOKENS,
+                #"max_tokens": AZURE_OPENAI_MAX_TOKENS,
             }
             resp = requests.post(
                 url,
@@ -702,7 +702,7 @@ A level 3 heading. Followed by a single, concise concluding sentence (under 150 
 1.  **Language**: The entire report must be in English.
 2.  **Data Source**: Base all analysis STRICTLY on the provided JSON data. Do not infer or invent information not present in the data.
 3.  **Tone**: Maintain a professional, objective, and analytical tone.
-4.  **Formatting**: Use Markdown exclusively for all formatting (headings, bold, backticks, lists).
+4.  **Formatting**: Use slack message formatting for all formatting (headings, bold, backticks, lists).
     """
     reduced_payload = _reduce_for_llm(payload, top_n=5)
 
