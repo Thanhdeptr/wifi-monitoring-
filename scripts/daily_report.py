@@ -646,11 +646,12 @@ A level 3 heading. Followed by a single, concise concluding sentence (under 150 
     )
      
 
-    
+    print("sending prompt to LLM")
     llm_text = _ollama_chat([
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": user_prompt},
     ])
+    print("LLM respons success")
 
     title = "*LLM Đánh giá tình trạng (24h)*"
     if not llm_text:
