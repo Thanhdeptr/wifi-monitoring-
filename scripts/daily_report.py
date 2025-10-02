@@ -646,7 +646,7 @@ A level 3 heading. Followed by a single, concise concluding sentence (under 150 
     )
      
 
-    print(user_prompt)
+    
     llm_text = _ollama_chat([
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": user_prompt},
