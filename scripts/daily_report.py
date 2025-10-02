@@ -10,11 +10,27 @@ import requests
 PROMETHEUS_URL = os.getenv("PROMETHEUS_URL", "http://192.168.10.18:9090")
 SLACK_WEBHOOK_URL = os.getenv("SLACK_WEBHOOK_URL", "")
 
+
 # LLM/Ollama configuration
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://192.168.10.32:11434")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama2:13b")
 LLM_ENABLE = os.getenv("LLM_ENABLE", "1") not in ("0", "false", "False")
 OLLAMA_TIMEOUT_SEC = int(os.getenv("OLLAMA_TIMEOUT_SEC", "300"))
+
+# Azure OpenAI configuration (optional override for LLM backend)
+AZURE_OPENAI_ENDPOINT = os.getenv(
+    "AZURE_OPENAI_ENDPOINT",
+    "https://az-aiai.openai.azure.com",
+)
+AZURE_OPENAI_DEPLOYMENT = os.getenv(
+    "AZURE_OPENAI_DEPLOYMENT",
+    "gpt-4.1",
+)
+AZURE_OPENAI_API_VERSION = os.getenv(
+    "AZURE_OPENAI_API_VERSION",
+    "2025-01-01-preview",
+)
+AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY", "")
 
 
 def _read_slack_webhook_from_secret() -> str:
@@ -28,9 +44,24 @@ def _read_slack_webhook_from_secret() -> str:
         return ""
 
 
+def _read_secret_file(name: str) -> str:
+    """Read a secret from secrets/<name> relative to this file."""
+    try:
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        secret_path = os.path.join(base_dir, "..", "secrets", name)
+        with open(secret_path, "r", encoding="utf-8") as fh:
+            return fh.read().strip()
+    except Exception:
+        return ""
+
+
 # Fallback: if env var is empty, read from secrets file
 if not SLACK_WEBHOOK_URL:
     SLACK_WEBHOOK_URL = _read_slack_webhook_from_secret()
+
+# Fallback: load Azure OpenAI API key from secrets if env var is empty
+if not AZURE_OPENAI_API_KEY:
+    AZURE_OPENAI_API_KEY = _read_secret_file("azure_openai_api_key")
 
 
 def prom_query(expr: str) -> List[Dict]:
@@ -318,17 +349,38 @@ def collect_7d_summary() -> Tuple[List[str], Dict[str, Any]]:
 
 def _ollama_chat(messages: List[Dict[str, str]], timeout: Optional[int] = None) -> Optional[str]:
     try:
-        resp = requests.post(
-            f"{OLLAMA_URL.rstrip('/')}/api/chat",
-            json={
-                "model": OLLAMA_MODEL,
+        # Prefer Azure OpenAI if endpoint and key are provided, otherwise fall back to local Ollama
+        if AZURE_OPENAI_ENDPOINT and AZURE_OPENAI_API_KEY:
+            url = (
+                f"{AZURE_OPENAI_ENDPOINT.rstrip('/')}/openai/deployments/"
+                f"{AZURE_OPENAI_DEPLOYMENT}/chat/completions?api-version={AZURE_OPENAI_API_VERSION}"
+            )
+            headers = {
+                # Azure OpenAI commonly uses api-key header
+                "api-key": AZURE_OPENAI_API_KEY,
+                "Content-Type": "application/json",
+            }
+            body = {
                 "messages": messages,
-                "stream": False,
-                "keep_alive": "5m",
-                "options": {"temperature": 0.2, "num_ctx": 8192},
-            },
-            timeout=timeout or OLLAMA_TIMEOUT_SEC,
-        )
+            }
+            resp = requests.post(
+                url,
+                headers=headers,
+                json=body,
+                timeout=timeout or OLLAMA_TIMEOUT_SEC,
+            )
+        else:
+            resp = requests.post(
+                f"{OLLAMA_URL.rstrip('/')}/api/chat",
+                json={
+                    "model": OLLAMA_MODEL,
+                    "messages": messages,
+                    "stream": False,
+                    "keep_alive": "5m",
+                    "options": {"temperature": 0.2, "num_ctx": 8192},
+                },
+                timeout=timeout or OLLAMA_TIMEOUT_SEC,
+            )
         if not resp.ok:
             return f"__ERR__ HTTP {resp.status_code}: {resp.text[:200]}"
         data = resp.json()
@@ -645,7 +697,7 @@ A level 3 heading. Followed by a single, concise concluding sentence (under 150 
         "\n\nFeature 24h processed (top-N) + 7 days history and compare today vs 7 days:\n" + json.dumps(reduced_payload, ensure_ascii=False) 
     )
      
-
+    print("SLACK_WEBHOOK_URL: ", SLACK_WEBHOOK_URL)
     print("sending prompt to LLM")
     llm_text = _ollama_chat([
         {"role": "system", "content": system_prompt},
