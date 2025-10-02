@@ -63,7 +63,7 @@ if not SLACK_WEBHOOK_URL:
 
 # Fallback: load Azure OpenAI API key from secrets if env var is empty
 if not AZURE_OPENAI_API_KEY:
-    AZURE_OPENAI_API_KEY = _read_secret_file("azure_openai_api_key")
+    AZURE_OPENAI_API_KEY = _read_secret_file("AZURE_OPENAI_API_KEY")
 
 
 def prom_query(expr: str) -> List[Dict]:
