@@ -15,7 +15,7 @@ SLACK_WEBHOOK_URL = os.getenv("SLACK_WEBHOOK_URL", "")
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://192.168.10.32:11434")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama2:13b")
 LLM_ENABLE = os.getenv("LLM_ENABLE", "1") not in ("0", "false", "False")
-OLLAMA_TIMEOUT_SEC = int(os.getenv("OLLAMA_TIMEOUT_SEC", "300"))
+OLLAMA_TIMEOUT_SEC = int(os.getenv("OLLAMA_TIMEOUT_SEC", "500"))
 
 # Azure OpenAI configuration (optional override for LLM backend)
 AZURE_OPENAI_ENDPOINT = os.getenv(
@@ -669,26 +669,26 @@ System Performance Analysis Report
 Date: YYYY-MM-DD
 --------------------------------------------------
  
-1. General Status
+1. *General Status*   
 [A 2-3 sentence paragraph summarizing overall system health.]
  
-2. Key Issues
+2. *Key Issues*
 - [A bullet point for a critical finding. State the component (e.g., GW4) and the metric.]
 - [Another bullet point.]
  
-3. Recommended Actions
+3. *Recommended Actions*
 - [A short, clear, and actionable step.]
  
-4. 7-Day Performance Comparison
+4. *7-Day Performance Comparison*
 - CPU Performance: [A qualitative description (e.g., significantly better, relatively stable).]
 - RAM Performance: [A qualitative description.]
 - Ping Latency: [A qualitative description.]
 - Error Count: [A qualitative description.]
  
-5. Points to Monitor
+5. *Points to Monitor*
 - [An item that requires ongoing observation.]
  
-6. Conclusion
+6. *Conclusion*
 [A single, concise concluding sentence.]
 ```
  
