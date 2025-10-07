@@ -153,9 +153,10 @@ scrape_configs:
       - targets: ['192.168.10.18:9202']
 
   # iPerf3 Exporter v2 - WAN1 (Enhanced by ThanhDeptr)
+  # Staggered scrape intervals to avoid concurrent iperf3 tests to same server
   - job_name: 'iperf3-exporter-v2-wan1'
-    scrape_interval: 3m
-    scrape_timeout: 1m
+    scrape_interval: 8m
+    scrape_timeout: 90s
     metrics_path: '/probe'
     params:
       target: ['192.168.10.175']
@@ -163,7 +164,7 @@ scrape_configs:
       bidirectional: ['true']
       bind_address: ['192.168.10.160']
       parallel: ['2']
-      period: ['30s']
+      period: ['20s']
     static_configs:
       - targets: ['192.168.10.18:9579']
         labels: 
@@ -173,8 +174,8 @@ scrape_configs:
 
   # iPerf3 Exporter v2 - WAN2
   - job_name: 'iperf3-exporter-v2-wan2'
-    scrape_interval: 3m
-    scrape_timeout: 40s
+    scrape_interval: 8m
+    scrape_timeout: 90s
     metrics_path: '/probe'
     params:
       target: ['192.168.10.175']
@@ -182,7 +183,7 @@ scrape_configs:
       bidirectional: ['true']
       bind_address: ['192.168.10.161']
       parallel: ['2']
-      period: ['30s']
+      period: ['20s']
     static_configs:
       - targets: ['192.168.10.18:9579']
         labels:
@@ -191,8 +192,8 @@ scrape_configs:
 
   # iPerf3 Exporter v2 - WAN3
   - job_name: 'iperf3-exporter-v2-wan3'
-    scrape_interval: 3m
-    scrape_timeout: 1m
+    scrape_interval: 8m
+    scrape_timeout: 90s
     metrics_path: '/probe'
     params:
       target: ['192.168.10.175']
@@ -200,7 +201,7 @@ scrape_configs:
       bidirectional: ['true']
       bind_address: ['192.168.10.162']
       parallel: ['2']
-      period: ['30s']
+      period: ['20s']
     static_configs:
       - targets: ['192.168.10.18:9579']
         labels:
@@ -209,8 +210,8 @@ scrape_configs:
 
   # iPerf3 Exporter v2 - WAN4
   - job_name: 'iperf3-exporter-v2-wan4'
-    scrape_interval: 3m
-    scrape_timeout: 1m
+    scrape_interval: 8m
+    scrape_timeout: 90s
     metrics_path: '/probe'
     params:
       target: ['192.168.10.175']
@@ -218,7 +219,7 @@ scrape_configs:
       bidirectional: ['true']
       bind_address: ['192.168.10.163']
       parallel: ['2']
-      period: ['30s']
+      period: ['20s']
     static_configs:
       - targets: ['192.168.10.18:9579']
         labels:
@@ -227,8 +228,8 @@ scrape_configs:
 
   # iPerf3 Exporter v2 - WAN5
   - job_name: 'iperf3-exporter-v2-wan5'
-    scrape_interval: 3m
-    scrape_timeout: 1m
+    scrape_interval: 8m
+    scrape_timeout: 90s
     metrics_path: '/probe'
     params:
       target: ['192.168.10.175']
@@ -236,7 +237,7 @@ scrape_configs:
       bidirectional: ['true']
       bind_address: ['192.168.10.164']
       parallel: ['2']
-      period: ['30s']
+      period: ['20s']
     static_configs:
       - targets: ['192.168.10.18:9579']
         labels:
@@ -245,8 +246,8 @@ scrape_configs:
 
   # iPerf3 Exporter v2 - WAN6
   - job_name: 'iperf3-exporter-v2-wan6'
-    scrape_interval: 3m
-    scrape_timeout: 1m
+    scrape_interval: 8m
+    scrape_timeout: 90s
     metrics_path: '/probe'
     params:
       target: ['192.168.10.175']
@@ -254,7 +255,7 @@ scrape_configs:
       bidirectional: ['true']
       bind_address: ['192.168.10.165']
       parallel: ['2']
-      period: ['30s']
+      period: ['20s']
     static_configs:
       - targets: ['192.168.10.18:9579']
         labels:
@@ -263,8 +264,8 @@ scrape_configs:
 
   # iPerf3 Exporter v2 - WAN7
   - job_name: 'iperf3-exporter-v2-wan7'
-    scrape_interval: 3m
-    scrape_timeout: 1m
+    scrape_interval: 8m
+    scrape_timeout: 90s
     metrics_path: '/probe'
     params:
       target: ['192.168.10.175']
@@ -272,7 +273,7 @@ scrape_configs:
       bidirectional: ['true']
       bind_address: ['192.168.10.166']
       parallel: ['2']
-      period: ['30s']
+      period: ['20s']
     static_configs:
       - targets: ['192.168.10.18:9579']
         labels:
@@ -281,8 +282,8 @@ scrape_configs:
 
   # iPerf3 Exporter v2 - WAN8
   - job_name: 'iperf3-exporter-v2-wan8'
-    scrape_interval: 3m
-    scrape_timeout: 1m
+    scrape_interval: 8m
+    scrape_timeout: 90s
     metrics_path: '/probe'
     params:
       target: ['192.168.10.175']
@@ -290,7 +291,7 @@ scrape_configs:
       bidirectional: ['true']
       bind_address: ['192.168.10.167']
       parallel: ['2']
-      period: ['30s']
+      period: ['20s']
     static_configs:
       - targets: ['192.168.10.18:9579']
         labels:
