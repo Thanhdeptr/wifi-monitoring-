@@ -159,6 +159,7 @@ scrape_configs:
     metrics_path: '/probe'
     params:
       target: ['192.168.10.175']
+      port: ['5201']
       bidirectional: ['true']
       bind_address: ['192.168.10.160']
       parallel: ['2']
@@ -177,6 +178,7 @@ scrape_configs:
     metrics_path: '/probe'
     params:
       target: ['192.168.10.175']
+      port: ['5201']
       bidirectional: ['true']
       bind_address: ['192.168.10.161']
       parallel: ['2']
@@ -190,10 +192,11 @@ scrape_configs:
   # iPerf3 Exporter v2 - WAN3
   - job_name: 'iperf3-exporter-v2-wan3'
     scrape_interval: 3m
-    scrape_timeout: 40s
+    scrape_timeout: 1m
     metrics_path: '/probe'
     params:
       target: ['192.168.10.175']
+      port: ['5201']
       bidirectional: ['true']
       bind_address: ['192.168.10.162']
       parallel: ['2']
@@ -207,10 +210,11 @@ scrape_configs:
   # iPerf3 Exporter v2 - WAN4
   - job_name: 'iperf3-exporter-v2-wan4'
     scrape_interval: 3m
-    scrape_timeout: 40s
+    scrape_timeout: 1m
     metrics_path: '/probe'
     params:
       target: ['192.168.10.175']
+      port: ['5201']
       bidirectional: ['true']
       bind_address: ['192.168.10.163']
       parallel: ['2']
@@ -224,10 +228,11 @@ scrape_configs:
   # iPerf3 Exporter v2 - WAN5
   - job_name: 'iperf3-exporter-v2-wan5'
     scrape_interval: 3m
-    scrape_timeout: 40s
+    scrape_timeout: 1m
     metrics_path: '/probe'
     params:
       target: ['192.168.10.175']
+      port: ['5201']
       bidirectional: ['true']
       bind_address: ['192.168.10.164']
       parallel: ['2']
@@ -241,10 +246,11 @@ scrape_configs:
   # iPerf3 Exporter v2 - WAN6
   - job_name: 'iperf3-exporter-v2-wan6'
     scrape_interval: 3m
-    scrape_timeout: 40s
+    scrape_timeout: 1m
     metrics_path: '/probe'
     params:
       target: ['192.168.10.175']
+      port: ['5201']
       bidirectional: ['true']
       bind_address: ['192.168.10.165']
       parallel: ['2']
@@ -258,10 +264,11 @@ scrape_configs:
   # iPerf3 Exporter v2 - WAN7
   - job_name: 'iperf3-exporter-v2-wan7'
     scrape_interval: 3m
-    scrape_timeout: 40s
+    scrape_timeout: 1m
     metrics_path: '/probe'
     params:
       target: ['192.168.10.175']
+      port: ['5201']
       bidirectional: ['true']
       bind_address: ['192.168.10.166']
       parallel: ['2']
@@ -275,10 +282,11 @@ scrape_configs:
   # iPerf3 Exporter v2 - WAN8
   - job_name: 'iperf3-exporter-v2-wan8'
     scrape_interval: 3m
-    scrape_timeout: 40s
+    scrape_timeout: 1m
     metrics_path: '/probe'
     params:
       target: ['192.168.10.175']
+      port: ['5201']
       bidirectional: ['true']
       bind_address: ['192.168.10.167']
       parallel: ['2']
