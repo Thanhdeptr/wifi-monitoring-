@@ -155,7 +155,7 @@ scrape_configs:
   # iPerf3 Exporter v2 - WAN1 (Enhanced by ThanhDeptr)
   - job_name: 'iperf3-exporter-v2-wan1'
     scrape_interval: 3m
-    scrape_timeout: 40s
+    scrape_timeout: 1m
     metrics_path: '/probe'
     params:
       target: ['192.168.10.175']
