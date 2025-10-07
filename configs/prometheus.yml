@@ -155,8 +155,9 @@ scrape_configs:
   # iPerf3 Exporter v2 - WAN1 (Enhanced by ThanhDeptr)
   # Staggered scrape intervals to avoid concurrent iperf3 tests to same server
   - job_name: 'iperf3-exporter-v2-wan1'
-    scrape_interval: 8m
+    scrape_interval: 5m
     scrape_timeout: 90s
+    scrape_offset: 0s
     metrics_path: '/probe'
     params:
       target: ['192.168.10.175']
@@ -174,8 +175,9 @@ scrape_configs:
 
   # iPerf3 Exporter v2 - WAN2
   - job_name: 'iperf3-exporter-v2-wan2'
-    scrape_interval: 8m
+    scrape_interval: 5m
     scrape_timeout: 90s
+    scrape_offset: 30s
     metrics_path: '/probe'
     params:
       target: ['192.168.10.175']
@@ -192,8 +194,9 @@ scrape_configs:
 
   # iPerf3 Exporter v2 - WAN3
   - job_name: 'iperf3-exporter-v2-wan3'
-    scrape_interval: 8m
+    scrape_interval: 5m
     scrape_timeout: 90s
+    scrape_offset: 1m
     metrics_path: '/probe'
     params:
       target: ['192.168.10.175']
@@ -210,8 +213,9 @@ scrape_configs:
 
   # iPerf3 Exporter v2 - WAN4
   - job_name: 'iperf3-exporter-v2-wan4'
-    scrape_interval: 8m
+    scrape_interval: 5m
     scrape_timeout: 90s
+    scrape_offset: 1m30s
     metrics_path: '/probe'
     params:
       target: ['192.168.10.175']
@@ -228,8 +232,9 @@ scrape_configs:
 
   # iPerf3 Exporter v2 - WAN5
   - job_name: 'iperf3-exporter-v2-wan5'
-    scrape_interval: 8m
+    scrape_interval: 5m
     scrape_timeout: 90s
+    scrape_offset: 2m
     metrics_path: '/probe'
     params:
       target: ['192.168.10.175']
@@ -246,8 +251,9 @@ scrape_configs:
 
   # iPerf3 Exporter v2 - WAN6
   - job_name: 'iperf3-exporter-v2-wan6'
-    scrape_interval: 8m
+    scrape_interval: 5m
     scrape_timeout: 90s
+    scrape_offset: 2m30s
     metrics_path: '/probe'
     params:
       target: ['192.168.10.175']
@@ -264,8 +270,9 @@ scrape_configs:
 
   # iPerf3 Exporter v2 - WAN7
   - job_name: 'iperf3-exporter-v2-wan7'
-    scrape_interval: 8m
+    scrape_interval: 5m
     scrape_timeout: 90s
+    scrape_offset: 3m
     metrics_path: '/probe'
     params:
       target: ['192.168.10.175']
@@ -282,8 +289,9 @@ scrape_configs:
 
   # iPerf3 Exporter v2 - WAN8
   - job_name: 'iperf3-exporter-v2-wan8'
-    scrape_interval: 8m
+    scrape_interval: 5m
     scrape_timeout: 90s
+    scrape_offset: 3m30s
     metrics_path: '/probe'
     params:
       target: ['192.168.10.175']
