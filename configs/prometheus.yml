@@ -160,7 +160,7 @@ scrape_configs:
     scrape_timeout: 200s
     metrics_path: '/probe'
     params:
-      target: ['192.168.10.175']
+      target: ['13.231.52.162']
       port: ['5201']
       bidirectional: ['true']
       bind_address: ['192.168.10.160']
@@ -180,7 +180,7 @@ scrape_configs:
     scrape_timeout: 200s
     metrics_path: '/probe'
     params:
-      target: ['192.168.10.175']
+      target: ['13.231.52.162']
       port: ['5201']
       bidirectional: ['true']
       bind_address: ['192.168.10.161']
@@ -199,7 +199,7 @@ scrape_configs:
     scrape_timeout: 200s
     metrics_path: '/probe'
     params:
-      target: ['192.168.10.175']
+      target: ['13.231.52.162']
       port: ['5201']
       bidirectional: ['true']
       bind_address: ['192.168.10.162']
@@ -218,7 +218,7 @@ scrape_configs:
     scrape_timeout: 200s
     metrics_path: '/probe'
     params:
-      target: ['192.168.10.175']
+      target: ['13.231.52.162']
       port: ['5201']
       bidirectional: ['true']
       bind_address: ['192.168.10.163']
@@ -237,7 +237,7 @@ scrape_configs:
     scrape_timeout: 200s
     metrics_path: '/probe'
     params:
-      target: ['192.168.10.175']
+      target: ['13.231.52.162']
       port: ['5201']
       bidirectional: ['true']
       bind_address: ['192.168.10.164']
@@ -256,7 +256,7 @@ scrape_configs:
     scrape_timeout: 200s
     metrics_path: '/probe'
     params:
-      target: ['192.168.10.175']
+      target: ['13.231.52.162']
       port: ['5201']
       bidirectional: ['true']
       bind_address: ['192.168.10.165']
@@ -275,7 +275,7 @@ scrape_configs:
     scrape_timeout: 200s
     metrics_path: '/probe'
     params:
-      target: ['192.168.10.175']
+      target: ['13.231.52.162']
       port: ['5201']
       bidirectional: ['true']
       bind_address: ['192.168.10.166']
@@ -294,7 +294,7 @@ scrape_configs:
     scrape_timeout: 200s
     metrics_path: '/probe'
     params:
-      target: ['192.168.10.175']
+      target: ['13.231.52.162']
       port: ['5201']
       bidirectional: ['true']
       bind_address: ['192.168.10.167']
