@@ -164,7 +164,7 @@ scrape_configs:
       bidirectional: ['true']
       bind_address: ['192.168.10.160']
       parallel: ['2']
-      period: ['10s']
+      period: ['8s']
     static_configs:
       - targets: ['192.168.10.18:9579']
         labels: 
@@ -183,7 +183,7 @@ scrape_configs:
       bidirectional: ['true']
       bind_address: ['192.168.10.161']
       parallel: ['2']
-      period: ['10s']
+      period: ['8s']
     static_configs:
       - targets: ['192.168.10.18:9579']
         labels:
@@ -201,7 +201,7 @@ scrape_configs:
       bidirectional: ['true']
       bind_address: ['192.168.10.162']
       parallel: ['2']
-      period: ['10s']
+      period: ['8s']
     static_configs:
       - targets: ['192.168.10.18:9579']
         labels:
@@ -219,7 +219,7 @@ scrape_configs:
       bidirectional: ['true']
       bind_address: ['192.168.10.163']
       parallel: ['2']
-      period: ['10s']
+      period: ['8s']
     static_configs:
       - targets: ['192.168.10.18:9579']
         labels:
@@ -237,7 +237,7 @@ scrape_configs:
       bidirectional: ['true']
       bind_address: ['192.168.10.164']
       parallel: ['2']
-      period: ['10s']
+      period: ['8s']
     static_configs:
       - targets: ['192.168.10.18:9579']
         labels:
@@ -255,7 +255,7 @@ scrape_configs:
       bidirectional: ['true']
       bind_address: ['192.168.10.165']
       parallel: ['2']
-      period: ['10s']
+      period: ['8s']
     static_configs:
       - targets: ['192.168.10.18:9579']
         labels:
@@ -273,7 +273,7 @@ scrape_configs:
       bidirectional: ['true']
       bind_address: ['192.168.10.166']
       parallel: ['2']
-      period: ['10s']
+      period: ['8s']
     static_configs:
       - targets: ['192.168.10.18:9579']
         labels:
@@ -291,7 +291,7 @@ scrape_configs:
       bidirectional: ['true']
       bind_address: ['192.168.10.167']
       parallel: ['2']
-      period: ['10s']
+      period: ['8s']
     static_configs:
       - targets: ['192.168.10.18:9579']
         labels:
