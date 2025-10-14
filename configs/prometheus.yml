@@ -156,7 +156,7 @@ scrape_configs:
   # Staggered intervals to avoid concurrent iperf3 tests to same server
   - job_name: 'iperf3-exporter-v2-wan1'
     scrape_interval: 10m
-    scrape_timeout: 200s
+    scrape_timeout: 450s
     metrics_path: '/probe'
     params:
       target: ['13.231.52.162']
@@ -175,7 +175,7 @@ scrape_configs:
   # iPerf3 Exporter v2 - WAN2
   - job_name: 'iperf3-exporter-v2-wan2'
     scrape_interval: 10m30s
-    scrape_timeout: 200s
+    scrape_timeout: 450s
     metrics_path: '/probe'
     params:
       target: ['13.231.52.162']
@@ -193,7 +193,7 @@ scrape_configs:
   # iPerf3 Exporter v2 - WAN3
   - job_name: 'iperf3-exporter-v2-wan3'
     scrape_interval: 11m
-    scrape_timeout: 200s
+    scrape_timeout: 450s
     metrics_path: '/probe'
     params:
       target: ['13.231.52.162']
@@ -211,7 +211,7 @@ scrape_configs:
   # iPerf3 Exporter v2 - WAN4
   - job_name: 'iperf3-exporter-v2-wan4'
     scrape_interval: 11m30s
-    scrape_timeout: 200s
+    scrape_timeout: 450s
     metrics_path: '/probe'
     params:
       target: ['13.231.52.162']
@@ -229,7 +229,7 @@ scrape_configs:
   # iPerf3 Exporter v2 - WAN5
   - job_name: 'iperf3-exporter-v2-wan5'
     scrape_interval: 10m
-    scrape_timeout: 200s
+    scrape_timeout: 450s
     metrics_path: '/probe'
     params:
       target: ['13.231.52.162']
@@ -247,7 +247,7 @@ scrape_configs:
   # iPerf3 Exporter v2 - WAN6
   - job_name: 'iperf3-exporter-v2-wan6'
     scrape_interval: 10m30s
-    scrape_timeout: 200s
+    scrape_timeout: 450s
     metrics_path: '/probe'
     params:
       target: ['13.231.52.162']
@@ -265,7 +265,7 @@ scrape_configs:
   # iPerf3 Exporter v2 - WAN7
   - job_name: 'iperf3-exporter-v2-wan7'
     scrape_interval: 11m
-    scrape_timeout: 200s
+    scrape_timeout: 450s
     metrics_path: '/probe'
     params:
       target: ['13.231.52.162']
@@ -283,7 +283,7 @@ scrape_configs:
   # iPerf3 Exporter v2 - WAN8
   - job_name: 'iperf3-exporter-v2-wan8'
     scrape_interval: 11m30s
-    scrape_timeout: 200s
+    scrape_timeout: 450s
     metrics_path: '/probe'
     params:
       target: ['13.231.52.162']
