@@ -165,7 +165,7 @@ scrape_configs:
       parallel: ['2']
       period: ['8s']
     static_configs:
-      - targets: ['192.168.10.18:9579']
+      - targets: ['192.168.10.175:9579']
         labels: 
           wan: 'WAN1'
           region: 'japan'
@@ -185,7 +185,7 @@ scrape_configs:
       parallel: ['2']
       period: ['8s']
     static_configs:
-      - targets: ['192.168.10.18:9579']
+      - targets: ['192.168.10.175:9579']
         labels: 
           wan: 'WAN1'
           region: 'japan'
@@ -204,7 +204,7 @@ scrape_configs:
       parallel: ['2']
       period: ['8s']
     static_configs:
-      - targets: ['192.168.10.18:9579']
+      - targets: ['192.168.10.175:9579']
         labels:
           wan: 'WAN2'
           region: 'japan'
@@ -224,7 +224,7 @@ scrape_configs:
       parallel: ['2']
       period: ['8s']
     static_configs:
-      - targets: ['192.168.10.18:9579']
+      - targets: ['192.168.10.175:9579']
         labels:
           wan: 'WAN2'
           region: 'japan'
@@ -243,7 +243,7 @@ scrape_configs:
       parallel: ['2']
       period: ['8s']
     static_configs:
-      - targets: ['192.168.10.18:9579']
+      - targets: ['192.168.10.175:9579']
         labels:
           wan: 'WAN3'
           region: 'japan'
@@ -263,7 +263,7 @@ scrape_configs:
       parallel: ['2']
       period: ['8s']
     static_configs:
-      - targets: ['192.168.10.18:9579']
+      - targets: ['192.168.10.175:9579']
         labels:
           wan: 'WAN3'
           region: 'japan'
@@ -282,7 +282,7 @@ scrape_configs:
       parallel: ['2']
       period: ['8s']
     static_configs:
-      - targets: ['192.168.10.18:9579']
+      - targets: ['192.168.10.175:9579']
         labels:
           wan: 'WAN4'
           region: 'japan'
@@ -302,7 +302,7 @@ scrape_configs:
       parallel: ['2']
       period: ['8s']
     static_configs:
-      - targets: ['192.168.10.18:9579']
+      - targets: ['192.168.10.175:9579']
         labels:
           wan: 'WAN4'
           region: 'japan'
@@ -321,7 +321,7 @@ scrape_configs:
       parallel: ['2']
       period: ['8s']
     static_configs:
-      - targets: ['192.168.10.18:9579']
+      - targets: ['192.168.10.175:9579']
         labels:
           wan: 'WAN5'
           region: 'japan'
@@ -341,7 +341,7 @@ scrape_configs:
       parallel: ['2']
       period: ['8s']
     static_configs:
-      - targets: ['192.168.10.18:9579']
+      - targets: ['192.168.10.175:9579']
         labels:
           wan: 'WAN5'
           region: 'japan'
@@ -360,7 +360,7 @@ scrape_configs:
       parallel: ['2']
       period: ['8s']
     static_configs:
-      - targets: ['192.168.10.18:9579']
+      - targets: ['192.168.10.175:9579']
         labels:
           wan: 'WAN6'
           region: 'japan'
@@ -380,7 +380,7 @@ scrape_configs:
       parallel: ['2']
       period: ['8s']
     static_configs:
-      - targets: ['192.168.10.18:9579']
+      - targets: ['192.168.10.175:9579']
         labels:
           wan: 'WAN6'
           region: 'japan'
@@ -399,7 +399,7 @@ scrape_configs:
       parallel: ['2']
       period: ['8s']
     static_configs:
-      - targets: ['192.168.10.18:9579']
+      - targets: ['192.168.10.175:9579']
         labels:
           wan: 'WAN7'
           region: 'japan'
@@ -419,7 +419,7 @@ scrape_configs:
       parallel: ['2']
       period: ['8s']
     static_configs:
-      - targets: ['192.168.10.18:9579']
+      - targets: ['192.168.10.175:9579']
         labels:
           wan: 'WAN7'
           region: 'japan'
@@ -438,7 +438,7 @@ scrape_configs:
       parallel: ['2']
       period: ['8s']
     static_configs:
-      - targets: ['192.168.10.18:9579']
+      - targets: ['192.168.10.175:9579']
         labels:
           wan: 'WAN8'
           region: 'japan'
@@ -458,7 +458,7 @@ scrape_configs:
       parallel: ['2']
       period: ['8s']
     static_configs:
-      - targets: ['192.168.10.18:9579']
+      - targets: ['192.168.10.175:9579']
         labels:
           wan: 'WAN8'
           region: 'japan'
