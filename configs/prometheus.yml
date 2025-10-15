@@ -161,11 +161,11 @@ scrape_configs:
       target: ['13.231.52.162']
       port: ['5201']
       bidirectional: ['false']
-      bind_address: ['192.168.10.160']
+      bind_address: ['192.168.10.34']
       parallel: ['2']
       period: ['8s']
     static_configs:
-      - targets: ['192.168.10.175:9579']
+      - targets: ['192.168.10.27:9579']
         labels: 
           wan: 'WAN1'
           region: 'japan'
@@ -181,11 +181,11 @@ scrape_configs:
       port: ['5201']
       bidirectional: ['false']
       reverse: ['true']
-      bind_address: ['192.168.10.160']
+      bind_address: ['192.168.10.34']
       parallel: ['2']
       period: ['8s']
     static_configs:
-      - targets: ['192.168.10.175:9579']
+      - targets: ['192.168.10.27:9579']
         labels: 
           wan: 'WAN1'
           region: 'japan'
@@ -200,11 +200,11 @@ scrape_configs:
       target: ['13.231.52.162']
       port: ['5201']
       bidirectional: ['false']
-      bind_address: ['192.168.10.161']
+      bind_address: ['192.168.10.35']
       parallel: ['2']
       period: ['8s']
     static_configs:
-      - targets: ['192.168.10.175:9579']
+      - targets: ['192.168.10.27:9579']
         labels:
           wan: 'WAN2'
           region: 'japan'
@@ -220,11 +220,11 @@ scrape_configs:
       port: ['5201']
       bidirectional: ['false']
       reverse: ['true']
-      bind_address: ['192.168.10.161']
+      bind_address: ['192.168.10.35']
       parallel: ['2']
       period: ['8s']
     static_configs:
-      - targets: ['192.168.10.175:9579']
+      - targets: ['192.168.10.27:9579']
         labels:
           wan: 'WAN2'
           region: 'japan'
@@ -239,11 +239,11 @@ scrape_configs:
       target: ['13.231.52.162']
       port: ['5201']
       bidirectional: ['false']
-      bind_address: ['192.168.10.162']
+      bind_address: ['192.168.10.36']
       parallel: ['2']
       period: ['8s']
     static_configs:
-      - targets: ['192.168.10.175:9579']
+      - targets: ['192.168.10.27:9579']
         labels:
           wan: 'WAN3'
           region: 'japan'
@@ -259,11 +259,11 @@ scrape_configs:
       port: ['5201']
       bidirectional: ['false']
       reverse: ['true']
-      bind_address: ['192.168.10.162']
+      bind_address: ['192.168.10.36']
       parallel: ['2']
       period: ['8s']
     static_configs:
-      - targets: ['192.168.10.175:9579']
+      - targets: ['192.168.10.27:9579']
         labels:
           wan: 'WAN3'
           region: 'japan'
@@ -278,11 +278,11 @@ scrape_configs:
       target: ['13.231.52.162']
       port: ['5201']
       bidirectional: ['false']
-      bind_address: ['192.168.10.163']
+      bind_address: ['192.168.10.37']
       parallel: ['2']
       period: ['8s']
     static_configs:
-      - targets: ['192.168.10.175:9579']
+      - targets: ['192.168.10.27:9579']
         labels:
           wan: 'WAN4'
           region: 'japan'
@@ -298,11 +298,11 @@ scrape_configs:
       port: ['5201']
       bidirectional: ['false']
       reverse: ['true']
-      bind_address: ['192.168.10.163']
+      bind_address: ['192.168.10.37']
       parallel: ['2']
       period: ['8s']
     static_configs:
-      - targets: ['192.168.10.175:9579']
+      - targets: ['192.168.10.27:9579']
         labels:
           wan: 'WAN4'
           region: 'japan'
@@ -317,11 +317,11 @@ scrape_configs:
       target: ['13.231.52.162']
       port: ['5201']
       bidirectional: ['false']
-      bind_address: ['192.168.10.164']
+      bind_address: ['192.168.10.38']
       parallel: ['2']
       period: ['8s']
     static_configs:
-      - targets: ['192.168.10.175:9579']
+      - targets: ['192.168.10.27:9579']
         labels:
           wan: 'WAN5'
           region: 'japan'
@@ -337,11 +337,11 @@ scrape_configs:
       port: ['5201']
       bidirectional: ['false']
       reverse: ['true']
-      bind_address: ['192.168.10.164']
+      bind_address: ['192.168.10.38']
       parallel: ['2']
       period: ['8s']
     static_configs:
-      - targets: ['192.168.10.175:9579']
+      - targets: ['192.168.10.27:9579']
         labels:
           wan: 'WAN5'
           region: 'japan'
@@ -356,11 +356,11 @@ scrape_configs:
       target: ['13.231.52.162']
       port: ['5201']
       bidirectional: ['false']
-      bind_address: ['192.168.10.165']
+      bind_address: ['192.168.10.39']
       parallel: ['2']
       period: ['8s']
     static_configs:
-      - targets: ['192.168.10.175:9579']
+      - targets: ['192.168.10.27:9579']
         labels:
           wan: 'WAN6'
           region: 'japan'
@@ -376,11 +376,11 @@ scrape_configs:
       port: ['5201']
       bidirectional: ['false']
       reverse: ['true']
-      bind_address: ['192.168.10.165']
+      bind_address: ['192.168.10.39']
       parallel: ['2']
       period: ['8s']
     static_configs:
-      - targets: ['192.168.10.175:9579']
+      - targets: ['192.168.10.27:9579']
         labels:
           wan: 'WAN6'
           region: 'japan'
@@ -395,11 +395,11 @@ scrape_configs:
       target: ['13.231.52.162']
       port: ['5201']
       bidirectional: ['false']
-      bind_address: ['192.168.10.166']
+      bind_address: ['192.168.10.40']
       parallel: ['2']
       period: ['8s']
     static_configs:
-      - targets: ['192.168.10.175:9579']
+      - targets: ['192.168.10.27:9579']
         labels:
           wan: 'WAN7'
           region: 'japan'
@@ -415,11 +415,11 @@ scrape_configs:
       port: ['5201']
       bidirectional: ['false']
       reverse: ['true']
-      bind_address: ['192.168.10.166']
+      bind_address: ['192.168.10.40']
       parallel: ['2']
       period: ['8s']
     static_configs:
-      - targets: ['192.168.10.175:9579']
+      - targets: ['192.168.10.27:9579']
         labels:
           wan: 'WAN7'
           region: 'japan'
@@ -434,11 +434,11 @@ scrape_configs:
       target: ['13.231.52.162']
       port: ['5201']
       bidirectional: ['false']
-      bind_address: ['192.168.10.167']
+      bind_address: ['192.168.10.41']
       parallel: ['2']
       period: ['8s']
     static_configs:
-      - targets: ['192.168.10.175:9579']
+      - targets: ['192.168.10.27:9579']
         labels:
           wan: 'WAN8'
           region: 'japan'
@@ -454,11 +454,11 @@ scrape_configs:
       port: ['5201']
       bidirectional: ['false']
       reverse: ['true']
-      bind_address: ['192.168.10.167']
+      bind_address: ['192.168.10.41']
       parallel: ['2']
       period: ['8s']
     static_configs:
-      - targets: ['192.168.10.175:9579']
+      - targets: ['192.168.10.27:9579']
         labels:
           wan: 'WAN8'
           region: 'japan'
