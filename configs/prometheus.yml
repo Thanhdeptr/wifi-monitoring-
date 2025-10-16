@@ -233,7 +233,7 @@ scrape_configs:
   # iPerf3 Exporter v2 - WAN3 Upload
   - job_name: 'iperf3-exporter-v2-wan3-upload'
     scrape_interval: 9m
-    scrape_timeout: 1m
+    scrape_timeout: 10s
     metrics_path: '/probe'
     params:
       target: ['13.231.52.162']
@@ -252,7 +252,7 @@ scrape_configs:
   # iPerf3 Exporter v2 - WAN3 Download
   - job_name: 'iperf3-exporter-v2-wan3-download'
     scrape_interval: 9m30s
-    scrape_timeout: 1m
+    scrape_timeout: 10s
     metrics_path: '/probe'
     params:
       target: ['13.231.52.162']
@@ -272,7 +272,7 @@ scrape_configs:
   # iPerf3 Exporter v2 - WAN4 Upload
   - job_name: 'iperf3-exporter-v2-wan4-upload'
     scrape_interval: 10m
-    scrape_timeout: 1m
+    scrape_timeout: 10s
     metrics_path: '/probe'
     params:
       target: ['13.231.52.162']
@@ -291,7 +291,7 @@ scrape_configs:
   # iPerf3 Exporter v2 - WAN4 Download
   - job_name: 'iperf3-exporter-v2-wan4-download'
     scrape_interval: 10m30s
-    scrape_timeout: 1m
+    scrape_timeout: 10s
     metrics_path: '/probe'
     params:
       target: ['13.231.52.162']
