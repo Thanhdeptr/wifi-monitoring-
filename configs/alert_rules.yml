@@ -88,43 +88,95 @@ groups:
           summary: "Omada controller high storage usage"
           description: "Controller {{ $labels.controller_name }} storage usage {{ $value }}% at site {{ $labels.site }}"
 
-  - name: speedtest_alerts
+ 
+
+  - name: iperf3_alerts
     rules:
-      - alert: SlowDownloadSpeed
-        expr: speedtest_download_bits_per_second < 20000000  # 20 Mbps
-        for: 5m
-        labels:
-          severity: warning
-        annotations:
-          summary: "Slow download speed detected"
-          description: "{{ $labels.line }} ({{ $labels.gateway }}) download speed is {{ $value | humanize }}bps ({{ $value | humanize1024 }}B/s)"
-          
-      - alert: SlowUploadSpeed
-        expr: speedtest_upload_bits_per_second < 20000000  # 20 Mbps
-        for: 5m
-        labels:
-          severity: warning
-        annotations:
-          summary: "Slow upload speed detected"
-          description: "{{ $labels.line }} ({{ $labels.gateway }}) upload speed is {{ $value | humanize }}bps ({{ $value | humanize1024 }}B/s)"
-          
-      - alert: HighPingLatency
-        expr: speedtest_ping_latency_milliseconds > 100  # 100ms
-        for: 3m
-        labels:
-          severity: warning
-        annotations:
-          summary: "High ping latency detected"
-          description: "{{ $labels.line }} ({{ $labels.gateway }}) ping latency is {{ $value }}ms"
-          
-      - alert: SpeedtestFailed
-        expr: speedtest_download_bits_per_second == 0
+      # iPerf3 Test Failure Alerts
+      - alert: Iperf3TestFailed
+        expr: iperf3_up == 0
         for: 10m
         labels:
           severity: critical
         annotations:
-          summary: "Speedtest failed"
-          description: "{{ $labels.line }} ({{ $labels.gateway }}) speedtest failed - no data received"
+          summary: "iPerf3 test failed"
+          description: "iPerf3 test to {{ $labels.target }} ({{ $labels.wan }}) {{ $labels.direction }} failed - {{ $labels.region }} region"
+
+      # iPerf3 Bandwidth Alerts - Japan Server
+      - alert: Iperf3SlowDownloadJapan
+        expr: iperf3_bandwidth_download_mbps{region="japan", direction="download"} < 25
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Slow download speed to Japan server"
+          description: "{{ $labels.wan }} download speed to Japan ({{ $labels.target }}) is {{ $value }} Mbps"
+
+      - alert: Iperf3SlowUploadJapan
+        expr: iperf3_bandwidth_upload_mbps{region="japan", direction="upload"} < 7
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Slow upload speed to Japan server"
+          description: "{{ $labels.wan }} upload speed to Japan ({{ $labels.target }}) is {{ $value }} Mbps"
+
+      # iPerf3 Bandwidth Alerts - Vietnam Server
+      - alert: Iperf3SlowDownloadVietnam
+        expr: iperf3_bandwidth_download_mbps{region="vietnam", direction="download"} < 65
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Slow download speed to Vietnam server"
+          description: "{{ $labels.wan }} download speed to Vietnam ({{ $labels.target }}) is {{ $value }} Mbps"
+
+      - alert: Iperf3SlowUploadVietnam
+        expr: iperf3_bandwidth_upload_mbps{region="vietnam", direction="upload"} < 180
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Slow upload speed to Vietnam server"
+          description: "{{ $labels.wan }} upload speed to Vietnam ({{ $labels.target }}) is {{ $value }} Mbps"
+
+      # Ping Quality Alerts - Japan Server
+      - alert: Iperf3PingFailedJapan
+        expr: ping_up{region="japan"} == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Ping test failed to Japan server"
+          description: "Ping to Japan ({{ $labels.target }}) from {{ $labels.wan }} failed"
+
+      - alert: Iperf3HighPingLatencyJapan
+        expr: ping_latency_average_ms{region="japan"} > 200
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High ping latency to Japan server"
+          description: "{{ $labels.wan }} ping latency to Japan ({{ $labels.target }}) is {{ $value }} ms"
+
+      # Ping Quality Alerts - Vietnam Server
+      - alert: Iperf3PingFailedVietnam
+        expr: ping_up{region="vietnam"} == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Ping test failed to Vietnam server"
+          description: "Ping to Vietnam ({{ $labels.target }}) from {{ $labels.wan }} failed"
+
+      - alert: Iperf3HighPingLatencyVietnam
+        expr: ping_latency_average_ms{region="vietnam"} > 20
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High ping latency to Vietnam server"
+          description: "{{ $labels.wan }} ping latency to Vietnam ({{ $labels.target }}) is {{ $value }} ms"
 
   - name: system_alerts
     rules:
@@ -154,3 +206,13 @@ groups:
         annotations:
           summary: "Grafana is down"
           description: "Grafana dashboard is not accessible"
+
+      # iPerf3 Exporter Down Alert
+      - alert: Iperf3ExporterDown
+        expr: up{job=~"iperf3-exporter-v2-.*"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "iPerf3 Exporter is down"
+          description: "iPerf3 Exporter ({{ $labels.job }}) is not responding - network performance monitoring may be affected"
