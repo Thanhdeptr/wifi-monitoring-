@@ -317,10 +317,10 @@ def collect_7d_summary() -> Tuple[List[str], Dict[str, Any]]:
         cpu_p95_worst = max(cpu_p95s) if cpu_p95s else 0.0
         ram_p95_worst = max(ram_p95s) if ram_p95s else 0.0
 
-        # Ping overall (max p95 among gateways)
+        # Ping overall (max p95 among regions)
         ping_p95s: List[float] = []
-        for gw in ["GW1", "GW2", "GW4", "GW5"]:
-            ping_series = prom_query_range_seconds(f"speedtest_ping_latency_milliseconds{{gateway=\"{gw}\"}}", start_epoch, end_epoch, 300)
+        for region in ["japan", "vietnam"]:
+            ping_series = prom_query_range_seconds(f"ping_latency_average_ms{{region=\"{region}\"}}", start_epoch, end_epoch, 300)
             nums = _series_values(ping_series)
             if nums:
                 ping_p95s.append(_percentile(nums, 95))
@@ -429,7 +429,7 @@ def _reduce_for_llm(payload: Dict[str, Any], top_n: int = 3) -> Dict[str, Any]:
     th = payload.get("thresholds", {})
     cpu = payload.get("cpu_by_gw", {})
     ram = payload.get("ram_by_gw", {})
-    ping = payload.get("ping_by_gw", {})
+    ping = payload.get("ping_by_region", {})
     spd = payload.get("speedtest_by_line", {})
     err = payload.get("errors_by_gw", {})
     hist7 = payload.get("history_7d", {})
@@ -439,7 +439,7 @@ def _reduce_for_llm(payload: Dict[str, Any], top_n: int = 3) -> Dict[str, Any]:
         "thresholds": th,
         "cpu_by_gw_top": _top_n_items(cpu, ["time_over_critical_min", "p95", "cv"], top_n, True),
         "ram_by_gw_top": _top_n_items(ram, ["time_over_critical_min", "p95", "cv"], top_n, True),
-        "ping_by_gw_top": _top_n_items(ping, ["time_over_critical_min", "p95"], top_n, True),
+        "ping_by_region_top": _top_n_items(ping, ["time_over_critical_min", "p95"], top_n, True),
         "speedtest_lines_top": _top_n_items(
             {k: {**v, "under_sum": (v.get("time_dl_under_warn_min", 0.0) + v.get("time_ul_under_warn_min", 0.0))} for k, v in spd.items()},
             ["under_sum"],
@@ -480,8 +480,9 @@ def collect_llm_assessment() -> List[str]:
     # Ping by gateway
     gateways = ["GW1", "GW2", "GW4", "GW5"]
 
-    # Speedtest by line
+    # iPerf3 Network Performance by line and region
     wan_lines = [f"WAN{i}" for i in range(1, 8 + 1)]
+    regions = ["japan", "vietnam"]
 
     def map_by_label(series: List[Dict], label: str) -> Dict[str, Dict[str, Any]]:
         out: Dict[str, Dict[str, Any]] = {}
@@ -538,18 +539,19 @@ def collect_llm_assessment() -> List[str]:
             "peak_time": dt.datetime.utcfromtimestamp(ts[vs.index(max(vs))]).strftime("%H:%M") if ts else "-",
         }
 
-    ping_by_gw: Dict[str, Dict[str, Any]] = {}
-    for gw in gateways:
-        series = prom_query_range(f"speedtest_ping_latency_milliseconds{{gateway=\"{gw}\"}}", start, end, step="5m")
+    # iPerf3 Ping by region (aggregated across all WANs)
+    ping_by_region: Dict[str, Dict[str, Any]] = {}
+    for region in regions:
+        series = prom_query_range(f"ping_latency_average_ms{{region=\"{region}\"}}", start, end, step="5m")
         ts, vs = _safe_float_series(series)
         if not vs:
-            ping_by_gw[gw] = {}
+            ping_by_region[region] = {}
             continue
         step_seconds = _estimate_step_seconds(ts)
         warn = th.get("ping_ms", {}).get("warning", 60.0)
         crit = th.get("ping_ms", {}).get("critical", 120.0)
         owarn_m, ocrit_m, spikes = _time_over_threshold_minutes(vs, (warn, crit), step_seconds)
-        ping_by_gw[gw] = {
+        ping_by_region[region] = {
             "avg": (sum(vs) / len(vs)),
             "p95": _percentile(vs, 95),
             "max": max(vs),
@@ -559,31 +561,47 @@ def collect_llm_assessment() -> List[str]:
             "peak_time": dt.datetime.utcfromtimestamp(ts[vs.index(max(vs))]).strftime("%H:%M") if ts else "-",
         }
 
+    # iPerf3 Network Performance by line and region
     speedtest_by_line: Dict[str, Dict[str, Any]] = {}
     for line in wan_lines:
-        dl_series = prom_query_range(f"speedtest_download_bits_per_second{{line=\"{line}\"}}", start, end, step="5m")
-        ul_series = prom_query_range(f"speedtest_upload_bits_per_second{{line=\"{line}\"}}", start, end, step="5m")
-        ts_dl, vs_dl = _safe_float_series(dl_series)
-        ts_ul, vs_ul = _safe_float_series(ul_series)
-        warn_dl = th.get("wan_download_bps", {}).get("warning", 20_000_000.0)
-        crit_dl = th.get("wan_download_bps", {}).get("critical", 10_000_000.0)
-        warn_ul = th.get("wan_upload_bps", {}).get("warning", 10_000_000.0)
-        crit_ul = th.get("wan_upload_bps", {}).get("critical", 5_000_000.0)
-        step_seconds = _estimate_step_seconds(ts_dl or ts_ul)
-        owarn_dl_m, ocrit_dl_m, _ = _time_over_threshold_minutes(vs_dl, (warn_dl, crit_dl), step_seconds) if vs_dl else (0.0, 0.0, 0)
-        # For bandwidth, "under-performance" is low values, so also compute time below warning
-        under_warn_dl_m = sum(1 for v in vs_dl if v <= warn_dl) * (step_seconds / 60.0) if vs_dl else 0.0
-        under_warn_ul_m = sum(1 for v in vs_ul if v <= warn_ul) * (step_seconds / 60.0) if vs_ul else 0.0
-        speedtest_by_line[line] = {
-            "dl_avg": (sum(vs_dl) / len(vs_dl)) if vs_dl else 0.0,
-            "dl_p10": _percentile(vs_dl, 10) if vs_dl else 0.0,
-            "dl_min": min(vs_dl) if vs_dl else 0.0,
-            "ul_avg": (sum(vs_ul) / len(vs_ul)) if vs_ul else 0.0,
-            "ul_p10": _percentile(vs_ul, 10) if vs_ul else 0.0,
-            "ul_min": min(vs_ul) if vs_ul else 0.0,
-            "time_dl_under_warn_min": under_warn_dl_m,
-            "time_ul_under_warn_min": under_warn_ul_m,
-        }
+        for region in regions:
+            # Download metrics (convert Mbps to bps for consistency)
+            dl_series = prom_query_range(f"iperf3_bandwidth_download_mbps{{wan=\"{line}\", region=\"{region}\", direction=\"download\"}} * 1000000", start, end, step="5m")
+            ul_series = prom_query_range(f"iperf3_bandwidth_upload_mbps{{wan=\"{line}\", region=\"{region}\", direction=\"upload\"}} * 1000000", start, end, step="5m")
+            ts_dl, vs_dl = _safe_float_series(dl_series)
+            ts_ul, vs_ul = _safe_float_series(ul_series)
+            
+            # Different thresholds for different regions
+            if region == "japan":
+                warn_dl = 25_000_000.0  # 25 Mbps
+                crit_dl = 10_000_000.0  # 10 Mbps
+                warn_ul = 7_000_000.0   # 7 Mbps
+                crit_ul = 3_000_000.0   # 3 Mbps
+            else:  # vietnam
+                warn_dl = 65_000_000.0  # 65 Mbps
+                crit_dl = 30_000_000.0  # 30 Mbps
+                warn_ul = 180_000_000.0 # 180 Mbps
+                crit_ul = 100_000_000.0 # 100 Mbps
+                
+            step_seconds = _estimate_step_seconds(ts_dl or ts_ul)
+            owarn_dl_m, ocrit_dl_m, _ = _time_over_threshold_minutes(vs_dl, (warn_dl, crit_dl), step_seconds) if vs_dl else (0.0, 0.0, 0)
+            # For bandwidth, "under-performance" is low values, so also compute time below warning
+            under_warn_dl_m = sum(1 for v in vs_dl if v <= warn_dl) * (step_seconds / 60.0) if vs_dl else 0.0
+            under_warn_ul_m = sum(1 for v in vs_ul if v <= warn_ul) * (step_seconds / 60.0) if vs_ul else 0.0
+            
+            key = f"{line}_{region}"
+            speedtest_by_line[key] = {
+                "line": line,
+                "region": region,
+                "dl_avg": (sum(vs_dl) / len(vs_dl)) if vs_dl else 0.0,
+                "dl_p10": _percentile(vs_dl, 10) if vs_dl else 0.0,
+                "dl_min": min(vs_dl) if vs_dl else 0.0,
+                "ul_avg": (sum(vs_ul) / len(vs_ul)) if vs_ul else 0.0,
+                "ul_p10": _percentile(vs_ul, 10) if vs_ul else 0.0,
+                "ul_min": min(vs_ul) if vs_ul else 0.0,
+                "time_dl_under_warn_min": under_warn_dl_m,
+                "time_ul_under_warn_min": under_warn_ul_m,
+            }
 
     # Interface errors (24h increase)
     expr_err = "sum by (gw) (increase(ifInErrors[24h]) + increase(ifOutErrors[24h]))"
@@ -608,7 +626,7 @@ def collect_llm_assessment() -> List[str]:
         "thresholds": th,
         "cpu_by_gw": cpu_by_gw,
         "ram_by_gw": ram_by_gw,
-        "ping_by_gw": ping_by_gw,
+        "ping_by_region": ping_by_region,
         "speedtest_by_line": speedtest_by_line,
         "errors_by_gw": err,
         "static": {k: v for k, v in static_ctx.items() if k != "thresholds"},
@@ -727,7 +745,7 @@ Date: YYYY-MM-DD
         # Fallback heuristic
         worst_cpu = max((v.get("p95", 0.0) for v in cpu_by_gw.values() if v), default=0.0)
         worst_ram = max((v.get("p95", 0.0) for v in ram_by_gw.values() if v), default=0.0)
-        worst_ping = max((v.get("p95", 0.0) for v in ping_by_gw.values() if v), default=0.0)
+        worst_ping = max((v.get("p95", 0.0) for v in ping_by_region.values() if v), default=0.0)
         err_total = int(sum(err.values()))
         summary = (
             f"- CPU p95 tệ nhất: {worst_cpu:.1f}% | RAM p95: {worst_ram:.1f}% | Ping p95: {worst_ping:.1f} ms | Errors: {err_total}\n"
@@ -824,51 +842,63 @@ def collect_mem_24h() -> List[str]:
 
 
 def collect_speedtest_by_line() -> List[str]:
-    # Average/min and timestamp per WAN line over last 24h
+    # Average/min and timestamp per WAN line over last 24h using iPerf3 exporter
     end = dt.datetime.utcnow()
     start = end - dt.timedelta(hours=24)
-    lines = ["*Speedtest by Line (24h)*"]
+    lines = ["*Network Performance by WAN Line (24h)*"]
 
     wan_lines = [f"WAN{i}" for i in range(1, 9)]
+    regions = ["japan", "vietnam"]
+    
     for line in wan_lines:
-        dl_series = prom_query_range(
-            f"speedtest_download_bits_per_second{{line=\"{line}\"}}",
-            start,
-            end,
-        )
-        ul_series = prom_query_range(
-            f"speedtest_upload_bits_per_second{{line=\"{line}\"}}",
-            start,
-            end,
-        )
-        ping_series = prom_query_range(
-            f"speedtest_ping_latency_milliseconds{{line=\"{line}\"}}",
-            start,
-            end,
-        )
+        lines.append(f"\n*{line}:*")
+        
+        for region in regions:
+            # Download metrics (convert Mbps to bps for consistency)
+            dl_series = prom_query_range(
+                f"iperf3_bandwidth_download_mbps{{wan=\"{line}\", region=\"{region}\", direction=\"download\"}} * 1000000",
+                start,
+                end,
+            )
+            # Upload metrics (convert Mbps to bps for consistency)
+            ul_series = prom_query_range(
+                f"iperf3_bandwidth_upload_mbps{{wan=\"{line}\", region=\"{region}\", direction=\"upload\"}} * 1000000",
+                start,
+                end,
+            )
+            # Ping metrics
+            ping_series = prom_query_range(
+                f"ping_latency_average_ms{{region=\"{region}\"}}",
+                start,
+                end,
+            )
 
-        def stats(series: List[Dict]) -> Tuple[float, float, float]:
-            if not series:
-                return 0.0, 0.0, 0.0
-            values = [(float(ts), float(v)) for ts, v in series[0]["values"] if v not in ("NaN", "Inf", "+Inf", "-Inf")]
-            if not values:
-                return 0.0, 0.0, 0.0
-            nums = [v for _, v in values]
-            avg = sum(nums) / len(nums)
-            vmin = min(nums)
-            tmin = min(values, key=lambda x: x[1])[0]
-            return avg, vmin, tmin
+            def stats(series: List[Dict]) -> Tuple[float, float, float]:
+                if not series:
+                    return 0.0, 0.0, 0.0
+                values = [(float(ts), float(v)) for ts, v in series[0]["values"] if v not in ("NaN", "Inf", "+Inf", "-Inf")]
+                if not values:
+                    return 0.0, 0.0, 0.0
+                nums = [v for _, v in values]
+                avg = sum(nums) / len(nums)
+                vmin = min(nums)
+                tmin = min(values, key=lambda x: x[1])[0]
+                return avg, vmin, tmin
 
-        dl_avg, dl_min, dl_t = stats(dl_series)
-        ul_avg, ul_min, ul_t = stats(ul_series)
-        ping_avg, _, _ = stats(ping_series)
+            dl_avg, dl_min, dl_t = stats(dl_series)
+            ul_avg, ul_min, ul_t = stats(ul_series)
+            ping_avg, ping_min, ping_t = stats(ping_series)
 
-        tmin_str = lambda ts: dt.datetime.utcfromtimestamp(ts).strftime("%H:%M") if ts else "-"
-        lines.append(
-            f"- {line}: DL avg {format_value(dl_avg, 'bps')}, min {format_value(dl_min, 'bps')} @ {tmin_str(dl_t)} | "
-            f"UL avg {format_value(ul_avg, 'bps')}, min {format_value(ul_min, 'bps')} @ {tmin_str(ul_t)} | "
-            f"Ping avg {ping_avg:.1f} ms"
-        )
+            tmin_str = lambda ts: dt.datetime.utcfromtimestamp(ts).strftime("%H:%M") if ts else "-"
+            
+            # Format region name for display
+            region_display = "🇯🇵 Japan" if region == "japan" else "🇻🇳 Vietnam"
+            
+            lines.append(
+                f"  {region_display}: DL avg {format_value(dl_avg, 'bps')}, min {format_value(dl_min, 'bps')} @ {tmin_str(dl_t)} | "
+                f"UL avg {format_value(ul_avg, 'bps')}, min {format_value(ul_min, 'bps')} @ {tmin_str(ul_t)} | "
+                f"Ping avg {ping_avg:.1f}ms, min {ping_min:.1f}ms @ {tmin_str(ping_t)}"
+            )
 
     return lines
 
