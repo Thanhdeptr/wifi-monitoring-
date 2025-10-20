@@ -66,81 +66,81 @@ scrape_configs:
         replacement: 192.168.10.18:9116
 
   # Speedtest monitoring - split per WAN and staggered intervals
-  - job_name: 'speedtest-wan1'
-    scrape_interval: 30m
-    scrape_timeout: 8m
-    static_configs:
-      - targets: ['192.168.10.18:9798']
-        labels:
-          gateway: 'GW1'
-          line: 'WAN1'
+  # - job_name: 'speedtest-wan1'
+  #   scrape_interval: 30m
+  #   scrape_timeout: 8m
+  #   static_configs:
+  #     - targets: ['192.168.10.18:9798']
+  #       labels:
+  #         gateway: 'GW1'
+  #         line: 'WAN1'
 
-  - job_name: 'speedtest-wan2'
-    scrape_interval: 31m
-    scrape_timeout: 8m
-    static_configs:
-      - targets: ['192.168.10.18:9799']
-        labels:
-          gateway: 'GW2'
-          gateway1: 'GW5'
-          line: 'WAN2'
+  # - job_name: 'speedtest-wan2'
+  #   scrape_interval: 31m
+  #   scrape_timeout: 8m
+  #   static_configs:
+  #     - targets: ['192.168.10.18:9799']
+  #       labels:
+  #         gateway: 'GW2'
+  #         gateway1: 'GW5'
+  #         line: 'WAN2'
 
-  - job_name: 'speedtest-wan3'
-    scrape_interval: 32m
-    scrape_timeout: 8m
-    static_configs:
-      - targets: ['192.168.10.18:9800']
-        labels:
-          gateway: 'GW2'
-          gateway1: 'GW5'
-          line: 'WAN3'
+  # - job_name: 'speedtest-wan3'
+  #   scrape_interval: 32m
+  #   scrape_timeout: 8m
+  #   static_configs:
+  #     - targets: ['192.168.10.18:9800']
+  #       labels:
+  #         gateway: 'GW2'
+  #         gateway1: 'GW5'
+  #         line: 'WAN3'
 
-  - job_name: 'speedtest-wan4'
-    scrape_interval: 33m
-    scrape_timeout: 8m
-    static_configs:
-      - targets: ['192.168.10.18:9801']
-        labels:
-          gateway: 'GW4'
-          line: 'WAN4'
+  # - job_name: 'speedtest-wan4'
+  #   scrape_interval: 33m
+  #   scrape_timeout: 8m
+  #   static_configs:
+  #     - targets: ['192.168.10.18:9801']
+  #       labels:
+  #         gateway: 'GW4'
+  #         line: 'WAN4'
 
-  - job_name: 'speedtest-wan5'
-    scrape_interval: 34m
-    scrape_timeout: 8m
-    static_configs:
-      - targets: ['192.168.10.18:9802']
-        labels:
-          gateway: 'GW4'
-          line: 'WAN5'
+  # - job_name: 'speedtest-wan5'
+  #   scrape_interval: 34m
+  #   scrape_timeout: 8m
+  #   static_configs:
+  #     - targets: ['192.168.10.18:9802']
+  #       labels:
+  #         gateway: 'GW4'
+  #         line: 'WAN5'
 
-  - job_name: 'speedtest-wan6'
-    scrape_interval: 35m
-    scrape_timeout: 8m
-    static_configs:
-      - targets: ['192.168.10.18:9803']
-        labels:
-          gateway: 'GW4'
-          gateway1: 'GW5'
-          line: 'WAN6'
+  # - job_name: 'speedtest-wan6'
+  #   scrape_interval: 35m
+  #   scrape_timeout: 8m
+  #   static_configs:
+  #     - targets: ['192.168.10.18:9803']
+  #       labels:
+  #         gateway: 'GW4'
+  #         gateway1: 'GW5'
+  #         line: 'WAN6'
 
-  - job_name: 'speedtest-wan7'
-    scrape_interval: 36m
-    scrape_timeout: 8m
-    static_configs:
-      - targets: ['192.168.10.18:9804']
-        labels:
-          gateway: 'GW4'
-          gateway1: 'GW5'
-          line: 'WAN7'
+  # - job_name: 'speedtest-wan7'
+  #   scrape_interval: 36m
+  #   scrape_timeout: 8m
+  #   static_configs:
+  #     - targets: ['192.168.10.18:9804']
+  #       labels:
+  #         gateway: 'GW4'
+  #         gateway1: 'GW5'
+  #         line: 'WAN7'
 
-  - job_name: 'speedtest-wan8'
-    scrape_interval: 37m
-    scrape_timeout: 8m
-    static_configs:
-      - targets: ['192.168.10.18:9805']
-        labels:
-          gateway: 'GW5'
-          line: 'WAN8'
+  # - job_name: 'speedtest-wan8'
+  #   scrape_interval: 37m
+  #   scrape_timeout: 8m
+  #   static_configs:
+  #     - targets: ['192.168.10.18:9805']
+  #       labels:
+  #         gateway: 'GW5'
+  #         line: 'WAN8'
 
   # Speedtest Japan monitoring - staggered intervals to avoid conflicts
 
@@ -464,5 +464,315 @@ scrape_configs:
           region: 'japan'
           direction: 'download'
 
+  # iPerf3 Exporter v2 - VN Server - WAN1 Upload
+  - job_name: 'iperf3-exporter-v2-vn-wan1-upload'
+    scrape_interval: 7m
+    scrape_timeout: 2m
+    metrics_path: '/probe'
+    params:
+      target: ['103.42.57.68']
+      port: ['5201']
+      bidirectional: ['false']
+      bind_address: ['192.168.10.34']
+      parallel: ['2']
+      period: ['8s']
+    static_configs:
+      - targets: ['192.168.10.27:9580']
+        labels: 
+          wan: 'WAN1'
+          region: 'vietnam'
+          direction: 'upload'
 
+  # iPerf3 Exporter v2 - VN Server - WAN1 Download
+  - job_name: 'iperf3-exporter-v2-vn-wan1-download'
+    scrape_interval: 7m30s
+    scrape_timeout: 2m
+    metrics_path: '/probe'
+    params:
+      target: ['103.42.57.68']
+      port: ['5201']
+      bidirectional: ['false']
+      reverse_mode: ['true']
+      bind_address: ['192.168.10.34']
+      parallel: ['2']
+      period: ['8s']
+    static_configs:
+      - targets: ['192.168.10.27:9580']
+        labels: 
+          wan: 'WAN1'
+          region: 'vietnam'
+          direction: 'download'
+
+  # iPerf3 Exporter v2 - VN Server - WAN2 Upload
+  - job_name: 'iperf3-exporter-v2-vn-wan2-upload'
+    scrape_interval: 8m
+    scrape_timeout: 2m
+    metrics_path: '/probe'
+    params:
+      target: ['103.42.57.68']
+      port: ['5201']
+      bidirectional: ['false']
+      bind_address: ['192.168.10.35']
+      parallel: ['2']
+      period: ['8s']
+    static_configs:
+      - targets: ['192.168.10.27:9580']
+        labels:
+          wan: 'WAN2'
+          region: 'vietnam'
+          direction: 'upload'
+
+  # iPerf3 Exporter v2 - VN Server - WAN2 Download
+  - job_name: 'iperf3-exporter-v2-vn-wan2-download'
+    scrape_interval: 8m30s
+    scrape_timeout: 2m
+    metrics_path: '/probe'
+    params:
+      target: ['103.42.57.68']
+      port: ['5201']
+      bidirectional: ['false']
+      reverse_mode: ['true']
+      bind_address: ['192.168.10.35']
+      parallel: ['2']
+      period: ['8s']
+    static_configs:
+      - targets: ['192.168.10.27:9580']
+        labels:
+          wan: 'WAN2'
+          region: 'vietnam'
+          direction: 'download'
+
+  # iPerf3 Exporter v2 - VN Server - WAN3 Upload
+  - job_name: 'iperf3-exporter-v2-vn-wan3-upload'
+    scrape_interval: 9m
+    scrape_timeout: 2m
+    metrics_path: '/probe'
+    params:
+      target: ['103.42.57.68']
+      port: ['5201']
+      bidirectional: ['false']
+      bind_address: ['192.168.10.36']
+      parallel: ['2']
+      period: ['8s']
+    static_configs:
+      - targets: ['192.168.10.27:9580']
+        labels:
+          wan: 'WAN3'
+          region: 'vietnam'
+          direction: 'upload'
+
+  # iPerf3 Exporter v2 - VN Server - WAN3 Download
+  - job_name: 'iperf3-exporter-v2-vn-wan3-download'
+    scrape_interval: 9m30s
+    scrape_timeout: 2m
+    metrics_path: '/probe'
+    params:
+      target: ['103.42.57.68']
+      port: ['5201']
+      bidirectional: ['false']
+      reverse_mode: ['true']
+      bind_address: ['192.168.10.36']
+      parallel: ['2']
+      period: ['8s']
+    static_configs:
+      - targets: ['192.168.10.27:9580']
+        labels:
+          wan: 'WAN3'
+          region: 'vietnam'
+          direction: 'download'
+
+  # iPerf3 Exporter v2 - VN Server - WAN4 Upload
+  - job_name: 'iperf3-exporter-v2-vn-wan4-upload'
+    scrape_interval: 10m
+    scrape_timeout: 2m
+    metrics_path: '/probe'
+    params:
+      target: ['103.42.57.68']
+      port: ['5201']
+      bidirectional: ['false']
+      bind_address: ['192.168.10.37']
+      parallel: ['2']
+      period: ['8s']
+    static_configs:
+      - targets: ['192.168.10.27:9580']
+        labels:
+          wan: 'WAN4'
+          region: 'vietnam'
+          direction: 'upload'
+
+  # iPerf3 Exporter v2 - VN Server - WAN4 Download
+  - job_name: 'iperf3-exporter-v2-vn-wan4-download'
+    scrape_interval: 10m30s
+    scrape_timeout: 2m
+    metrics_path: '/probe'
+    params:
+      target: ['103.42.57.68']
+      port: ['5201']
+      bidirectional: ['false']
+      reverse_mode: ['true']
+      bind_address: ['192.168.10.37']
+      parallel: ['2']
+      period: ['8s']
+    static_configs:
+      - targets: ['192.168.10.27:9580']
+        labels:
+          wan: 'WAN4'
+          region: 'vietnam'
+          direction: 'download'
+
+  # iPerf3 Exporter v2 - VN Server - WAN5 Upload
+  - job_name: 'iperf3-exporter-v2-vn-wan5-upload'
+    scrape_interval: 11m
+    scrape_timeout: 2m
+    metrics_path: '/probe'
+    params:
+      target: ['103.42.57.68']
+      port: ['5201']
+      bidirectional: ['false']
+      bind_address: ['192.168.10.38']
+      parallel: ['2']
+      period: ['8s']
+    static_configs:
+      - targets: ['192.168.10.27:9580']
+        labels:
+          wan: 'WAN5'
+          region: 'vietnam'
+          direction: 'upload'
+
+  # iPerf3 Exporter v2 - VN Server - WAN5 Download
+  - job_name: 'iperf3-exporter-v2-vn-wan5-download'
+    scrape_interval: 11m30s
+    scrape_timeout: 2m
+    metrics_path: '/probe'
+    params:
+      target: ['103.42.57.68']
+      port: ['5201']
+      bidirectional: ['false']
+      reverse_mode: ['true']
+      bind_address: ['192.168.10.38']
+      parallel: ['2']
+      period: ['8s']
+    static_configs:
+      - targets: ['192.168.10.27:9580']
+        labels:
+          wan: 'WAN5'
+          region: 'vietnam'
+          direction: 'download'
+
+  # iPerf3 Exporter v2 - VN Server - WAN6 Upload
+  - job_name: 'iperf3-exporter-v2-vn-wan6-upload'
+    scrape_interval: 12m
+    scrape_timeout: 2m
+    metrics_path: '/probe'
+    params:
+      target: ['103.42.57.68']
+      port: ['5201']
+      bidirectional: ['false']
+      bind_address: ['192.168.10.39']
+      parallel: ['2']
+      period: ['8s']
+    static_configs:
+      - targets: ['192.168.10.27:9580']
+        labels:
+          wan: 'WAN6'
+          region: 'vietnam'
+          direction: 'upload'
+
+  # iPerf3 Exporter v2 - VN Server - WAN6 Download
+  - job_name: 'iperf3-exporter-v2-vn-wan6-download'
+    scrape_interval: 12m30s
+    scrape_timeout: 2m
+    metrics_path: '/probe'
+    params:
+      target: ['103.42.57.68']
+      port: ['5201']
+      bidirectional: ['false']
+      reverse_mode: ['true']
+      bind_address: ['192.168.10.39']
+      parallel: ['2']
+      period: ['8s']
+    static_configs:
+      - targets: ['192.168.10.27:9580']
+        labels:
+          wan: 'WAN6'
+          region: 'vietnam'
+          direction: 'download'
+
+  # iPerf3 Exporter v2 - VN Server - WAN7 Upload
+  - job_name: 'iperf3-exporter-v2-vn-wan7-upload'
+    scrape_interval: 13m
+    scrape_timeout: 2m
+    metrics_path: '/probe'
+    params:
+      target: ['103.42.57.68']
+      port: ['5201']
+      bidirectional: ['false']
+      bind_address: ['192.168.10.40']
+      parallel: ['2']
+      period: ['8s']
+    static_configs:
+      - targets: ['192.168.10.27:9580']
+        labels:
+          wan: 'WAN7'
+          region: 'vietnam'
+          direction: 'upload'
+
+  # iPerf3 Exporter v2 - VN Server - WAN7 Download
+  - job_name: 'iperf3-exporter-v2-vn-wan7-download'
+    scrape_interval: 13m30s
+    scrape_timeout: 2m
+    metrics_path: '/probe'
+    params:
+      target: ['103.42.57.68']
+      port: ['5201']
+      bidirectional: ['false']
+      reverse_mode: ['true']
+      bind_address: ['192.168.10.40']
+      parallel: ['2']
+      period: ['8s']
+    static_configs:
+      - targets: ['192.168.10.27:9580']
+        labels:
+          wan: 'WAN7'
+          region: 'vietnam'
+          direction: 'download'
+
+  # iPerf3 Exporter v2 - VN Server - WAN8 Upload
+  - job_name: 'iperf3-exporter-v2-vn-wan8-upload'
+    scrape_interval: 14m
+    scrape_timeout: 2m
+    metrics_path: '/probe'
+    params:
+      target: ['103.42.57.68']
+      port: ['5201']
+      bidirectional: ['false']
+      bind_address: ['192.168.10.41']
+      parallel: ['2']
+      period: ['8s']
+    static_configs:
+      - targets: ['192.168.10.27:9580']
+        labels:
+          wan: 'WAN8'
+          region: 'vietnam'
+          direction: 'upload'
+
+  # iPerf3 Exporter v2 - VN Server - WAN8 Download
+  - job_name: 'iperf3-exporter-v2-vn-wan8-download'
+    scrape_interval: 14m30s
+    scrape_timeout: 2m
+    metrics_path: '/probe'
+    params:
+      target: ['103.42.57.68']
+      port: ['5201']
+      bidirectional: ['false']
+      reverse_mode: ['true']
+      bind_address: ['192.168.10.41']
+      parallel: ['2']
+      period: ['8s']
+    static_configs:
+      - targets: ['192.168.10.27:9580']
+        labels:
+          wan: 'WAN8'
+          region: 'vietnam'
+          direction: 'download'
 
