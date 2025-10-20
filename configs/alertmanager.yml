@@ -7,6 +7,77 @@ route:
   repeat_interval: 1h
   receiver: 'default-receiver'
   routes:
+    # iPerf3 alerts - group by wan and region
+    - match:
+        alertname: Iperf3TestFailed
+      group_by: ['alertname', 'wan', 'region']
+      group_wait: 5s
+      group_interval: 30s
+      repeat_interval: 2h
+      receiver: 'critical-alerts'
+    - match:
+        alertname: Iperf3PingFailedJapan
+      group_by: ['alertname', 'wan']
+      group_wait: 5s
+      group_interval: 30s
+      repeat_interval: 2h
+      receiver: 'critical-alerts'
+    - match:
+        alertname: Iperf3PingFailedVietnam
+      group_by: ['alertname', 'wan']
+      group_wait: 5s
+      group_interval: 30s
+      repeat_interval: 2h
+      receiver: 'critical-alerts'
+    - match:
+        alertname: Iperf3ExporterDown
+      group_wait: 2s
+      repeat_interval: 1h
+      receiver: 'critical-alerts'
+    # iPerf3 bandwidth and latency warnings
+    - match:
+        alertname: Iperf3SlowDownloadJapan
+      group_by: ['alertname', 'wan']
+      group_wait: 30s
+      group_interval: 2m
+      repeat_interval: 4h
+      receiver: 'warning-alerts'
+    - match:
+        alertname: Iperf3SlowUploadJapan
+      group_by: ['alertname', 'wan']
+      group_wait: 30s
+      group_interval: 2m
+      repeat_interval: 4h
+      receiver: 'warning-alerts'
+    - match:
+        alertname: Iperf3SlowDownloadVietnam
+      group_by: ['alertname', 'wan']
+      group_wait: 30s
+      group_interval: 2m
+      repeat_interval: 4h
+      receiver: 'warning-alerts'
+    - match:
+        alertname: Iperf3SlowUploadVietnam
+      group_by: ['alertname', 'wan']
+      group_wait: 30s
+      group_interval: 2m
+      repeat_interval: 4h
+      receiver: 'warning-alerts'
+    - match:
+        alertname: Iperf3HighPingLatencyJapan
+      group_by: ['alertname', 'wan']
+      group_wait: 30s
+      group_interval: 2m
+      repeat_interval: 4h
+      receiver: 'warning-alerts'
+    - match:
+        alertname: Iperf3HighPingLatencyVietnam
+      group_by: ['alertname', 'wan']
+      group_wait: 30s
+      group_interval: 2m
+      repeat_interval: 4h
+      receiver: 'warning-alerts'
+    # Default routes for other alerts
     - match:
         severity: critical
       receiver: 'critical-alerts'
@@ -38,14 +109,17 @@ receivers:
   - name: 'critical-alerts'
     slack_configs:
       - channel: '#hien-test-channel-bot'
-        title: '{{ if eq .Status "resolved" }}RESOLVED ✅{{ else }}CRITICAL 🚨{{ end }}: {{ .GroupLabels.alertname }} - {{ .GroupLabels.device }}'
+        title: '{{ if eq .Status "resolved" }}RESOLVED ✅{{ else }}CRITICAL 🚨{{ end }}: {{ .GroupLabels.alertname }}{{ if .GroupLabels.device }} - {{ .GroupLabels.device }}{{ end }}{{ if .GroupLabels.wan }} - {{ .GroupLabels.wan }}{{ end }}'
         text: |-
           {{ range .Alerts -}}
           *Status*: {{ if eq $.Status "resolved" }}RESOLVED{{ else }}FIRING{{ end }}
           *Alert*: {{ .Annotations.summary }}
           *Description*: {{ .Annotations.description }}
-          *Device*: {{ .Labels.device }}
-          *Gateway*: {{ .Labels.gw }}
+          {{ if .Labels.device }}*Device*: {{ .Labels.device }}{{ end }}
+          {{ if .Labels.gw }}*Gateway*: {{ .Labels.gw }}{{ end }}
+          {{ if .Labels.wan }}*WAN*: {{ .Labels.wan }}{{ end }}
+          {{ if .Labels.region }}*Region*: {{ .Labels.region }}{{ end }}
+          {{ if .Labels.direction }}*Direction*: {{ .Labels.direction }}{{ end }}
           *Severity*: {{ .Labels.severity }}
           {{ if eq $.Status "resolved" }}*Resolved at*: <!date^{{ .EndsAt.Unix }}^{date_num} {time}|{{ .EndsAt }}>{{ else }}*Starts at*: <!date^{{ .StartsAt.Unix }}^{date_num} {time}|{{ .StartsAt }}>{{ end }}
           ---
@@ -56,14 +130,17 @@ receivers:
   - name: 'warning-alerts'
     slack_configs:
       - channel: '#hien-test-channel-bot'
-        title: '{{ if eq .Status "resolved" }}RESOLVED ✅{{ else }}WARNING ⚠️{{ end }}: {{ .GroupLabels.alertname }} - {{ .GroupLabels.device }}'
+        title: '{{ if eq .Status "resolved" }}RESOLVED ✅{{ else }}WARNING ⚠️{{ end }}: {{ .GroupLabels.alertname }}{{ if .GroupLabels.device }} - {{ .GroupLabels.device }}{{ end }}{{ if .GroupLabels.wan }} - {{ .GroupLabels.wan }}{{ end }}'
         text: |-
           {{ range .Alerts -}}
           *Status*: {{ if eq $.Status "resolved" }}RESOLVED{{ else }}FIRING{{ end }}
           *Alert*: {{ .Annotations.summary }}
           *Description*: {{ .Annotations.description }}
-          *Device*: {{ .Labels.device }}
-          *Gateway*: {{ .Labels.gw }}
+          {{ if .Labels.device }}*Device*: {{ .Labels.device }}{{ end }}
+          {{ if .Labels.gw }}*Gateway*: {{ .Labels.gw }}{{ end }}
+          {{ if .Labels.wan }}*WAN*: {{ .Labels.wan }}{{ end }}
+          {{ if .Labels.region }}*Region*: {{ .Labels.region }}{{ end }}
+          {{ if .Labels.direction }}*Direction*: {{ .Labels.direction }}{{ end }}
           *Severity*: {{ .Labels.severity }}
           {{ if eq $.Status "resolved" }}*Resolved at*: <!date^{{ .EndsAt.Unix }}^{date_num} {time}|{{ .EndsAt }}>{{ else }}*Starts at*: <!date^{{ .StartsAt.Unix }}^{date_num} {time}|{{ .StartsAt }}>{{ end }}
           ---
