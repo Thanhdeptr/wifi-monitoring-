@@ -892,7 +892,7 @@ def collect_speedtest_by_line() -> List[str]:
             tmin_str = lambda ts: dt.datetime.utcfromtimestamp(ts).strftime("%H:%M") if ts else "-"
             
             # Format region name for display
-            region_display = "🇯🇵 Japan" if region == "japan" else "🇻🇳 Vietnam"
+            region_display = "Japan" if region == "japan" else "Vietnam"
             
             lines.append(
                 f"  {region_display}: DL avg {format_value(dl_avg, 'bps')}, min {format_value(dl_min, 'bps')} @ {tmin_str(dl_t)} | "
