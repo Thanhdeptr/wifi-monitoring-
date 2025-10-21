@@ -209,11 +209,11 @@ groups:
 
       # iPerf3 Exporter Down Alert
       - alert: Iperf3ExporterDown
-        expr: iperf3_up == 0 or ping_up == 0
+        expr: iperf3_up == 0
         for: 2m
         labels:
           severity: critical
         annotations:
           summary: "iPerf3 Exporter is down"
-          description: "iPerf3 test or ping to {{ $labels.target }} ({{ $labels.job }}) failed - {{ $labels.region }} region"
+          description: "iPerf3 test to {{ $labels.target }} ({{ $labels.job }}) failed - {{ $labels.region }} region"
 
