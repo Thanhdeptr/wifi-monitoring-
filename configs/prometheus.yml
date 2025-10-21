@@ -49,6 +49,10 @@ scrape_configs:
         labels:
           device: 'LRT224'
           gw: 'GW2'
+      - targets: ['192.168.10.3']
+        labels:
+          device: 'ER605'
+          gw: 'GW3'
       - targets: ['192.168.10.4']
         labels:
           device: 'ER5120'
